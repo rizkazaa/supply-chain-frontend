@@ -87,7 +87,6 @@ export default {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
-  background-color: #ffffff;
   max-height: calc(100vh - 60px);
 }
 

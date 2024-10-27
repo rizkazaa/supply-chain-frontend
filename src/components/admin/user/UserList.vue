@@ -1,42 +1,46 @@
 <template>
-  <div class="user-list">
-    <div class="header">
-      <h2>Daftar Pengguna</h2>
-      <button class="add-btn" @click="$emit('add-user')">
-        Tambah Pengguna
-      </button>
-    </div>
+  <div class="user">
+    <h2 class="user-title">User</h2>
+    <div class="user-list">
+      <div class="header">
+        <h2>Daftar Pengguna</h2>
+        <button class="add-btn" @click="$emit('add-user')">
+          <i class="fa-solid fa-plus icon"></i>
+          Tambah Pengguna
+        </button>
+      </div>
 
-    <div class="table-responsive">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th class="action-column">Aksi</th>
-          </tr>
-        </thead>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th class="action-column">Aksi</th>
+            </tr>
+          </thead>
 
-        <tbody>
-          <tr v-for="user in users" :key="user.id">
-            <td>{{ user.id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role }}</td>
+          <tbody>
+            <tr v-for="user in users" :key="user.id">
+              <td>{{ user.id }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.role }}</td>
 
-            <td class="action-buttons">
-              <button class="edit-btn" @click="$emit('edit-user', user)">
-                Edit
-              </button>
-              <button class="delete-btn" @click="deleteUser(user.id)">
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <td class="action-buttons">
+                <button class="edit-btn" @click="$emit('edit-user', user)">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="delete-btn" @click="deleteUser(user.id)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -62,6 +66,16 @@ export default {
 </script>
 
 <style scoped>
+.user {
+  padding: 20px;
+}
+
+.user-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #736efe;
+}
+
 .user-list {
   padding: 24px;
   background-color: #fff;
@@ -78,22 +92,22 @@ export default {
 }
 
 h2 {
-  color: #35c88d;
+  color: #736efe;
   font-size: 24px;
 }
 
 .add-btn {
-  background-color: #35c88d;
+  background-color: #736efe;
   color: white;
-  padding: 6px 12px;
+  padding: 8px 12px;
   border: none;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
 }
 
 .add-btn:hover {
-  background-color: #23855e;
+  background-color: #615dd7;
 }
 
 .table-responsive {
@@ -108,15 +122,17 @@ table {
 
 th,
 td {
-  border: 1px solid #ddd;
+  border: 0.5px solid #cbcbcb;
   padding: 12px 15px;
   text-align: center;
   vertical-align: middle;
+  font-size: 14px;
 }
 
 th {
-  background-color: #35c88d;
+  background-color: #736efe;
   color: white;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
@@ -125,34 +141,58 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-  background-color: #ddd;
+  background-color: #cbcbcb;
 }
 
 button {
   padding: 6px 12px;
   border: none;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
-}
-
-.edit-btn {
-  background-color: #fed86e;
-  color: white;
-  margin-right: 5px;
 }
 
 .edit-btn:hover {
   background-color: #bca052;
 }
 
-.delete-btn {
-  background-color: #df3636;
-  color: white;
-}
-
 .delete-btn:hover {
   background-color: #bb3232;
+}
+
+.icon {
+  margin-right: 8px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.edit-btn {
+  color: #fed86e;
+  background-color: #fff4d5;
+  border-radius: 10px;
+  font-size: 14px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+}
+
+.delete-btn {
+  color: #fe6e70;
+  background-color: #ffdfdf;
+  border-radius: 10px;
+  font-size: 14px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 600px) {

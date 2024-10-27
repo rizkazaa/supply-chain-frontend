@@ -1,82 +1,72 @@
 <template>
-  <div class="transaction-list">
-    <h2>Daftar Transaksi</h2>
+  <div class="order">
+    <h2 class="order-title">Order</h2>
+    <div class="transaction-list">
+      <div class="header">
+        <h2>Daftar Transaksi</h2>
+      </div>
 
-    <div class="table-responsive">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nama User</th>
+              <th>Nama Barang</th>
+              <th>Jumlah Pinjam</th>
+              <th>Tanggal Pinjam</th>
+              <th>Tanggal Pengembalian</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
 
-            <th>Nama User</th>
+          <tbody>
+            <tr v-for="transaction in transactions" :key="transaction.id">
+              <td>{{ transaction.id }}</td>
+              <td>{{ transaction.namaUser }}</td>
+              <td>{{ transaction.namaBarang }}</td>
+              <td>{{ transaction.jumlahPinjam }}</td>
+              <td>{{ transaction.tanggalPinjam }}</td>
+              <td>{{ transaction.tanggalPengembalian }}</td>
+              <td>{{ transaction.status }}</td>
 
-            <th>Nama Barang</th>
+              <td class="action-buttons">
+                <button
+                  class="return-btn"
+                  @click="openReturnForm(transaction)"
+                  :disabled="transaction.status === 'Returned'"
+                >
+                  {{
+                    transaction.status === "Returned"
+                      ? "Dikembalikan"
+                      : "Kembalikan"
+                  }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-            <th>Jumlah Pinjam</th>
-
-            <th>Tanggal Pinjam</th>
-
-            <th>Tanggal Pengembalian</th>
-
-            <th>Status</th>
-
-            <th>Aksi</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr v-for="transaction in transactions" :key="transaction.id">
-            <td>{{ transaction.id }}</td>
-
-            <td>{{ transaction.namaUser }}</td>
-
-            <td>{{ transaction.namaBarang }}</td>
-
-            <td>{{ transaction.jumlahPinjam }}</td>
-
-            <td>{{ transaction.tanggalPinjam }}</td>
-
-            <td>{{ transaction.tanggalPengembalian }}</td>
-
-            <td>{{ transaction.status }}</td>
-
-            <td class="action-buttons">
-              <button
-                class="return-btn"
-                @click="openReturnForm(transaction)"
-                :disabled="transaction.status === 'Returned'"
-              >
-                {{
-                  transaction.status === "Returned"
-                    ? "Dikembalikan"
-                    : "Kembalikan"
-                }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <Modal :visible="showForm" @close="cancelReturnForm">
+        <TransactionForm
+          :transaction="selectedTransaction"
+          @submit="handleReturn"
+          @cancel="cancelReturnForm"
+        />
+      </Modal>
     </div>
-
-    <Modal :visible="showForm" @close="cancelReturnForm">
-      <TransactionForm
-        :transaction="selectedTransaction"
-        @submit="handleReturn"
-        @cancel="cancelReturnForm"
-      />
-    </Modal>
   </div>
 </template>
 
 <script>
 import Modal from "@/components/Modal.vue";
-
 import TransactionForm from "@/components/user/transaction/TransactionForm.vue";
 
 export default {
   components: {
     Modal,
-
     TransactionForm,
   },
 
@@ -85,39 +75,26 @@ export default {
       transactions: [
         {
           id: "2024001",
-
           namaUser: "John Doe",
-
           namaBarang: "Acer Nitro 15 AN515-58",
-
           jumlahPinjam: 1,
-
           tanggalPinjam: "2022-10-10",
-
           tanggalPengembalian: "2022-10-17",
-
           status: "Borrowed",
         },
 
         {
           id: "2024002",
-
           namaUser: "Jane Smith",
-
           namaBarang: "Lenovo LOQ 15 15IRH8",
-
           jumlahPinjam: 1,
-
           tanggalPinjam: "2022-10-10",
-
           tanggalPengembalian: "2022-10-17",
-
           status: "Borrowed",
         },
       ],
 
       showForm: false,
-
       selectedTransaction: null,
     };
   },
@@ -125,7 +102,6 @@ export default {
   methods: {
     openReturnForm(transaction) {
       this.selectedTransaction = { ...transaction };
-
       this.showForm = true;
     },
 
@@ -146,7 +122,6 @@ export default {
 
     cancelReturnForm() {
       this.showForm = false;
-
       this.selectedTransaction = null;
     },
   },
@@ -154,6 +129,16 @@ export default {
 </script>
 
 <style scoped>
+.order {
+  padding: 20px;
+}
+
+.order-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #736efe;
+}
+
 .transaction-list {
   padding: 24px;
   background-color: #fff;
@@ -170,12 +155,12 @@ export default {
 }
 
 h2 {
-  color: #35c88d;
+  color: #736efe;
   font-size: 24px;
 }
 
 .add-btn {
-  background-color: #35c88d;
+  background-color: #736efe;
   color: white;
   padding: 6px 12px;
   border: none;
@@ -185,7 +170,7 @@ h2 {
 }
 
 .add-btn:hover {
-  background-color: #23855e;
+  background-color: #615dd7;
 }
 
 .table-responsive {
@@ -200,15 +185,17 @@ table {
 
 th,
 td {
-  border: 1px solid #ddd;
+  border: 0.5px solid #cbcbcb;
   padding: 12px 15px;
   text-align: center;
   vertical-align: middle;
+  font-size: 14px;
 }
 
 th {
-  background-color: #35c88d;
+  background-color: #736efe;
   color: white;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
@@ -217,7 +204,7 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-  background-color: #ddd;
+  background-color: #cbcbcb;
 }
 
 button {

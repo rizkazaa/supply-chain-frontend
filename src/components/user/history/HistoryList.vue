@@ -1,43 +1,38 @@
 <template>
-  <div class="history-list">
-    <h2>Riwayat Peminjaman</h2>
+  <div class="history">
+    <h2 class="history-title">History</h2>
+    <div class="history-list">
+      <div class="header">
+        <h2>Riwayat Peminjaman</h2>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nama Barang</th>
+              <th>Jumlah Pinjam</th>
+              <th>Tanggal Pinjam</th>
+              <th>Tanggal Kembali</th>
+              <th>Status</th>
+            </tr>
+          </thead>
 
-    <div class="table-responsive">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
+          <tbody>
+            <tr v-for="history in histories" :key="history.id">
+              <td>{{ history.id }}</td>
+              <td>{{ history.namaBarang }}</td>
+              <td>{{ history.jumlahPinjam }}</td>
+              <td>{{ history.tanggalPinjam }}</td>
+              <td>{{ history.tanggalKembali }}</td>
 
-            <th>Nama Barang</th>
-
-            <th>Jumlah Pinjam</th>
-
-            <th>Tanggal Pinjam</th>
-
-            <th>Tanggal Kembali</th>
-
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr v-for="history in histories" :key="history.id">
-            <td>{{ history.id }}</td>
-
-            <td>{{ history.namaBarang }}</td>
-
-            <td>{{ history.jumlahPinjam }}</td>
-
-            <td>{{ history.tanggalPinjam }}</td>
-
-            <td>{{ history.tanggalKembali }}</td>
-
-            <td :class="['status', history.status.toLowerCase()]">
-              {{ history.status }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <td :class="['status', history.status.toLowerCase()]">
+                {{ history.status }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -51,29 +46,19 @@ export default {
       histories: [
         {
           id: 1,
-
           namaBarang: "Acer Nitro 15 AN515-58",
-
           jumlahPinjam: 1,
-
           tanggalPinjam: "2023-05-01",
-
           tanggalKembali: "2023-05-10",
-
           status: "selesai",
         },
 
         {
           id: 2,
-
           namaBarang: "Lenovo LOQ 15 15IRH8",
-
           jumlahPinjam: 2,
-
           tanggalPinjam: "2023-06-15",
-
           tanggalKembali: "2023-06-20",
-
           status: "diproses",
         },
       ],
@@ -83,6 +68,16 @@ export default {
 </script>
 
 <style scoped>
+.history {
+  padding: 20px;
+}
+
+.history-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #736efe;
+}
+
 .history-list {
   padding: 24px;
   background-color: #fff;
@@ -91,13 +86,16 @@ export default {
   margin: 20px 0;
 }
 
-h2 {
-  color: #35c88d;
-  font-size: 24px;
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+}
+
+h2 {
+  color: #736efe;
+  font-size: 24px;
 }
 
 table {
@@ -107,15 +105,17 @@ table {
 
 th,
 td {
-  border: 1px solid #ddd;
+  border: 1px solid #cbcbcb;
   padding: 12px 15px;
-  text-align: left;
+  text-align: center;
+  font-size: 14px;
 }
 
 th {
-  background-color: #35c88d;
+  background-color: #736efe;
   color: white;
   text-transform: uppercase;
+  font-size: 14px;
 }
 
 .table-responsive {
@@ -128,7 +128,7 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-  background-color: #ddd;
+  background-color: #cbcbcb;
 }
 
 .status {

@@ -1,41 +1,64 @@
 <template>
-  <div class="item-list">
-    <div class="header">
-      <h2>Daftar Barang</h2>
-      <button class="add-btn" @click="showAddForm">Tambah Item</button>
-    </div>
+  <div class="product">
+    <h2 class="product-title">Product</h2>
+    <div class="item-list">
+      <div class="header">
+        <h2>Daftar Barang</h2>
+        <button class="add-btn" @click="showAddForm">
+          <i class="fa-solid fa-plus icon"></i>Tambah Item
+        </button>
+      </div>
 
-    <div class="item-cards">
-      <ItemCard
-        v-for="item in items"
-        :key="item.kode"
-        :item="item"
-        @edit-item="editItem"
-        @delete-item="deleteItem"
-      />
-    </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Kode</th>
+              <th>Nama Barang</th>
+              <th>Deskripsi</th>
+              <th>Stok</th>
+              <th class="action-column">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in items" :key="item.kode">
+              <td>{{ item.kode }}</td>
+              <td>{{ item.nama }}</td>
+              <td>{{ item.deskripsi }}</td>
+              <td>{{ item.stok }}</td>
+              <td class="action-buttons">
+                <button class="edit-btn" @click="editItem(item)">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="delete-btn" @click="deleteItem(item.kode)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-    <div>
-      <Modal :visible="showForm" @close="cancelEditForm">
-        <ItemForm
-          :item="selectedItem"
-          :isEdit="isEdit"
-          @submit="handleSubmit"
-          @cancel="cancelEditForm"
-        />
-      </Modal>
+      <div>
+        <Modal :visible="showForm" @close="cancelEditForm">
+          <ItemForm
+            :item="selectedItem"
+            :isEdit="isEdit"
+            @submit="handleSubmit"
+            @cancel="cancelEditForm"
+          />
+        </Modal>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import ItemCard from "@/components/admin/item/ItemCard.vue";
 import Modal from "@/components/Modal.vue";
 import ItemForm from "@/components/admin/item/ItemForm.vue";
 
 export default {
   components: {
-    ItemCard,
     Modal,
     ItemForm,
   },
@@ -49,7 +72,6 @@ export default {
           deskripsi: "Intel Core i5 12500H, RTX 3050, RAM 8GB DDR4, LAYAR 15.6",
           stok: 80,
         },
-
         {
           kode: "2024002",
           nama: "Lenovo LOQ 15 15IRH8",
@@ -57,7 +79,6 @@ export default {
           stok: 80,
         },
       ],
-
       showForm: false,
       selectedItem: null,
       isEdit: false,
@@ -92,7 +113,6 @@ export default {
           this.items.push(item);
         }
       }
-
       this.showForm = false;
     },
 
@@ -108,6 +128,16 @@ export default {
 </script>
 
 <style scoped>
+.product {
+  padding: 20px;
+}
+
+.product-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #736efe;
+}
+
 .item-list {
   padding: 24px;
   background-color: #fff;
@@ -124,22 +154,22 @@ export default {
 }
 
 h2 {
-  color: #35c88d;
+  color: #736efe;
   font-size: 24px;
 }
 
 .add-btn {
-  background-color: #35c88d;
+  background-color: #736efe;
   color: white;
-  padding: 6px 12px;
+  padding: 8px 12px;
   border: none;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
 }
 
 .add-btn:hover {
-  background-color: #23855e;
+  background-color: #615dd7;
 }
 
 .table-responsive {
@@ -154,15 +184,17 @@ table {
 
 th,
 td {
-  border: 1px solid #ddd;
+  border: 0.5px solid #cbcbcb;
   padding: 12px 15px;
   text-align: center;
   vertical-align: middle;
+  font-size: 14px;
 }
 
 th {
-  background-color: #35c88d;
+  background-color: #736efe;
   color: white;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
@@ -171,34 +203,58 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-  background-color: #ddd;
+  background-color: #cbcbcb;
 }
 
 button {
   padding: 6px 12px;
   border: none;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
-}
-
-.edit-btn {
-  background-color: #fed86e;
-  color: white;
-  margin-right: 5px;
 }
 
 .edit-btn:hover {
   background-color: #bca052;
 }
 
-.delete-btn {
-  background-color: #df3636;
-  color: white;
-}
-
 .delete-btn:hover {
   background-color: #bb3232;
+}
+
+.icon {
+  margin-right: 8px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.edit-btn {
+  color: #fed86e;
+  background-color: #fff4d5;
+  border-radius: 10px;
+  font-size: 14px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+}
+
+.delete-btn {
+  color: #fe6e70;
+  background-color: #ffdfdf;
+  border-radius: 10px;
+  font-size: 14px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 600px) {

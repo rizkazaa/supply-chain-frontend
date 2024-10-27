@@ -65,7 +65,7 @@ export default {
 
 <style scoped>
 header {
-  background-color: #35c88d;
+  background-color: #ffffff;
   padding: 10px 20px;
   display: flex;
   align-items: center;
@@ -73,9 +73,10 @@ header {
   width: calc(100% - 180px);
   position: fixed;
   top: 0;
-  left: 160px;
+  left: 200px;
   z-index: 1000;
   transition: width 0.3s ease, left 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 header.expanded {
@@ -86,7 +87,7 @@ header.expanded {
 .toggle-btn {
   background: none;
   border: none;
-  color: white;
+  color: #736efe;
   font-size: 24px;
   cursor: pointer;
   margin-right: 10px;
@@ -119,29 +120,29 @@ header.expanded {
 .role-selection {
   display: flex;
   justify-content: center;
-  background-color: #35c88d;
   padding: 10px;
 }
 
 button {
+  color: #736efe;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
   margin: 0 10px;
   padding: 5px 10px;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  background-color: #35c88d;
-  color: white;
-  transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #35c88d;
+  background-color: #ffffff;
+  border-radius: 8px;
 }
 
 button.active {
-  background-color: #23855e;
+  background-color: #736efe;
+  border-radius: 8px;
+  color: #ffffff;
 }
-
 @media (max-width: 768px) {
   header {
     width: 100%;

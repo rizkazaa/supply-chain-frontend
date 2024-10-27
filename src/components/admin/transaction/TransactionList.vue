@@ -1,47 +1,52 @@
 <template>
-  <div class="transaction-list">
-    <div class="header">
-      <h2>Daftar Transaksi</h2>
-    </div>
+  <div class="order">
+    <h2 class="order-title">Order</h2>
+    <div class="transaction-list">
+      <div class="header">
+        <h2>Daftar Transaksi</h2>
+      </div>
 
-    <div class="table-responsive">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nama Karyawan</th>
-            <th>Nama Barang</th>
-            <th>Jumlah Pinjam</th>
-            <th>Tanggal Pinjam</th>
-            <th>Tanggal Kembali</th>
-            <th>Status</th>
-            <th class="action-column">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="transaction in transactions" :key="transaction.kode">
-            <td>{{ transaction.kode }}</td>
-            <td>{{ transaction.namaKaryawan }}</td>
-            <td>{{ transaction.namaBarang }}</td>
-            <td>{{ transaction.jumlahPinjam }}</td>
-            <td>{{ transaction.tanggalPinjam }}</td>
-            <td>{{ transaction.tanggalKembali }}</td>
-            <td>{{ transaction.status }}</td>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nama Karyawan</th>
+              <th>Nama Barang</th>
+              <th>Jumlah Pinjam</th>
+              <th>Tanggal Pinjam</th>
+              <th>Tanggal Kembali</th>
+              <th>Status</th>
+              <th class="action-column">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="transaction in transactions" :key="transaction.kode">
+              <td>{{ transaction.kode }}</td>
+              <td>{{ transaction.namaKaryawan }}</td>
+              <td>{{ transaction.namaBarang }}</td>
+              <td>{{ transaction.jumlahPinjam }}</td>
+              <td>{{ transaction.tanggalPinjam }}</td>
+              <td>{{ transaction.tanggalKembali }}</td>
+              <td>{{ transaction.status }}</td>
 
-            <td class="action-buttons">
-              <button
-                class="verif-btn"
-                @click="verifikasi(transaction)"
-                :disabled="transaction.status === 'Returned'"
-              >
-                {{
-                  transaction.status === "Returned" ? "Returned" : "Verifikasi"
-                }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <td class="action-buttons">
+                <button
+                  class="verif-btn"
+                  @click="verifikasi(transaction)"
+                  :disabled="transaction.status === 'Returned'"
+                >
+                  {{
+                    transaction.status === "Returned"
+                      ? "Returned"
+                      : "Verifikasi"
+                  }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -84,6 +89,16 @@ export default {
 </script>
 
 <style scoped>
+.order {
+  padding: 20px;
+}
+
+.order-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #736efe;
+}
+
 .transaction-list {
   padding: 24px;
   background-color: #fff;
@@ -100,12 +115,12 @@ export default {
 }
 
 h2 {
-  color: #35c88d;
+  color: #736efe;
   font-size: 24px;
 }
 
 .add-btn {
-  background-color: #35c88d;
+  background-color: #736efe;
   color: white;
   padding: 6px 12px;
   border: none;
@@ -115,7 +130,7 @@ h2 {
 }
 
 .add-btn:hover {
-  background-color: #23855e;
+  background-color: #615dd7;
 }
 
 .table-responsive {
@@ -130,15 +145,17 @@ table {
 
 th,
 td {
-  border: 1px solid #ddd;
+  border: 0.5px solid #cbcbcb;
   padding: 12px 15px;
   text-align: center;
   vertical-align: middle;
+  font-size: 14px;
 }
 
 th {
-  background-color: #35c88d;
+  background-color: #736efe;
   color: white;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
@@ -147,7 +164,7 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-  background-color: #ddd;
+  background-color: #cbcbcb;
 }
 
 button {
