@@ -5,7 +5,7 @@
       <div class="header">
         <h2>Daftar Barang</h2>
         <button class="add-btn" @click="showAddForm">
-          <i class="fa-solid fa-plus icon"></i>Tambah Item
+          <i class="fa-solid fa-plus icon"></i>Tambah Barang
         </button>
       </div>
 
