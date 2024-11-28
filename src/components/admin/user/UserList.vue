@@ -1,66 +1,141 @@
 <template>
   <div class="user">
-    <h2 class="user-title">User</h2>
     <div class="user-list">
       <div class="header">
-        <h2>Daftar Pengguna</h2>
-        <button class="add-btn" @click="$emit('add-user')">
-          <i class="fa-solid fa-plus icon"></i>
-          Tambah Pengguna
-        </button>
+        <h2>User List</h2>
+
+        <button class="add-btn" @click="showAddForm">Tambah Pengguna</button>
       </div>
 
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th class="action-column">Aksi</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr v-for="user in users" :key="user.id">
-              <td>{{ user.id }}</td>
-              <td>{{ user.username }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.role }}</td>
-
-              <td class="action-buttons">
-                <button class="edit-btn" @click="$emit('edit-user', user)">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-                <button class="delete-btn" @click="deleteUser(user.id)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="user-cards">
+        <UserCard
+          v-for="user in filteredUsers"
+          :key="user.id"
+          :user="user"
+          @edit-user="editUser"
+          @delete-user="handleDeleteUser"
+        />
       </div>
+
+      <Modal :visible="showForm" @close="cancelEditForm">
+        <UserForm
+          :user="selectedUser"
+          :isEdit="isEdit"
+          @submit="handleSubmit"
+          @cancel="cancelEditForm"
+        />
+      </Modal>
     </div>
   </div>
 </template>
 
 <script>
+import { computed, onMounted } from "vue";
+import { useUserStore } from "@/store/userStore";
+import { useAuthStore } from "@/store/authStore";
+import UserCard from "@/components/admin/user/UserCard.vue";
+import Modal from "@/components/Modal.vue";
+import UserForm from "@/components/admin/user/UserForm.vue";
+import eventBus from "@/utils/EventBus";
+
 export default {
-  data() {
+  name: "users",
+
+  components: {
+    UserCard,
+    Modal,
+    UserForm,
+  },
+
+  setup() {
+    const userStore = useUserStore();
+    const authStore = useAuthStore();
+    const users = computed(() => userStore.users);
+
+    onMounted(() => {
+      if (authStore.token) {
+        userStore.fetchUsers();
+      } else {
+        console.error("User is not authenticated");
+      }
+    });
+
     return {
-      users: [
-        { id: "1", username: "Asep", email: "asep@email.com", role: "Admin" },
-        { id: "2", username: "Budi", email: "budi@email.com", role: "User" },
-      ],
+      users,
+      userStore,
+      addUser: userStore.addUser,
+      updateUser: userStore.updateUser,
+      deleteUser: userStore.deleteUser,
     };
   },
 
-  methods: {
-    deleteUser(id) {
-      this.users = this.users.filter((user) => user.id !== id);
-      this.$emit("delete-user", id);
+  data() {
+    return {
+      showForm: false,
+      selectedUser: null,
+      isEdit: false,
+      searchQuery: "",
+    };
+  },
+
+  computed: {
+    filteredUsers() {
+      return this.users.filter((user) =>
+        user.username.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
     },
+  },
+
+  methods: {
+    showAddForm() {
+      this.selectedUser = {
+        id: "",
+        username: "",
+        email: "",
+        role: "STAKEHOLDER",
+      };
+      this.isEdit = false;
+      this.showForm = true;
+    },
+
+    editUser(user) {
+      this.selectedUser = { ...user };
+      this.isEdit = true;
+      this.showForm = true;
+    },
+
+    async handleSubmit(user) {
+      if (this.isEdit) {
+        await this.updateUser(user);
+      } else {
+        await this.addUser(user);
+      }
+
+      await this.userStore.fetchUsers(); // Fetch latest users
+
+      this.showForm = false;
+    },
+
+    cancelEditForm() {
+      this.showForm = false;
+    },
+
+    async handleDeleteUser(id) {
+      await this.deleteUser(id);
+      await this.userStore.fetchUsers(); // Fetch latest users
+    },
+
+    handleSearch(query) {
+      this.searchQuery = query;
+    },
+  },
+
+  unmounted() {
+    eventBus.on("search", this.handleSearch);
+  },
+
+  beforeUnmount() {
+    eventBus.off("search", this.handleSearch);
   },
 };
 </script>
@@ -69,13 +144,6 @@ export default {
 .user {
   padding: 20px;
 }
-
-.user-title {
-  font-size: 32px;
-  font-weight: bold;
-  color: #736efe;
-}
-
 .user-list {
   padding: 24px;
   background-color: #fff;
@@ -87,22 +155,23 @@ export default {
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  align-products: center;
+  margin-bottom: 20px;
 }
 
 h2 {
   color: #736efe;
+  font-weight: 600;
   font-size: 24px;
 }
 
 .add-btn {
   background-color: #736efe;
   color: white;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border: none;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 14px;
 }
 
@@ -122,17 +191,15 @@ table {
 
 th,
 td {
-  border: 0.5px solid #cbcbcb;
+  border: 1px solid #ddd;
   padding: 12px 15px;
   text-align: center;
   vertical-align: middle;
-  font-size: 14px;
 }
 
 th {
   background-color: #736efe;
   color: white;
-  font-size: 14px;
   text-transform: uppercase;
 }
 
@@ -141,58 +208,34 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-  background-color: #cbcbcb;
+  background-color: #ddd;
 }
 
 button {
   padding: 6px 12px;
   border: none;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 14px;
+}
+
+.edit-btn {
+  background-color: #fed86e;
+  color: white;
+  margin-right: 5px;
 }
 
 .edit-btn:hover {
   background-color: #bca052;
 }
 
+.delete-btn {
+  background-color: #df3636;
+  color: white;
+}
+
 .delete-btn:hover {
   background-color: #bb3232;
-}
-
-.icon {
-  margin-right: 8px;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.edit-btn {
-  color: #fed86e;
-  background-color: #fff4d5;
-  border-radius: 10px;
-  font-size: 14px;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 4px;
-}
-
-.delete-btn {
-  color: #fe6e70;
-  background-color: #ffdfdf;
-  border-radius: 10px;
-  font-size: 14px;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 @media (max-width: 600px) {

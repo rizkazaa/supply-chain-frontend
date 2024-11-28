@@ -1,11 +1,14 @@
 <template>
-  <div class="item-card">
-    <h3>{{ item.nama }}</h3>
-    <p>{{ item.deskripsi }}</p>
-    <p class="stock">Stok: {{ item.stok }}</p>
+  <div class="product-card">
+    <h3>{{ product.product_name }}</h3>
+    <p>{{ product.category }}</p>
+    <p class="stock">quantity_of_product: {{ product.quantity_of_product }}</p>
     <div class="buttons">
-      <button @click="$emit('edit-item', item)" class="edit">Edit</button>
-      <button @click="$emit('delete-item', item.kode)" class="delete">
+      <button @click="$emit('editProduct', product)" class="edit">Edit</button>
+      <button
+        @click="$emit('deleteProduct', product.product_id)"
+        class="delete"
+      >
         Delete
       </button>
     </div>
@@ -14,9 +17,9 @@
 
 <script>
 export default {
-  name: "ItemCard",
+  name: "productCard",
   props: {
-    item: {
+    product: {
       type: Object,
       required: true,
     },
@@ -25,7 +28,7 @@ export default {
 </script>
 
 <style scoped>
-.item-card {
+.product-card {
   border: 1px solid #ddd;
   padding: 16px;
   margin-bottom: 10px;
@@ -35,34 +38,34 @@ export default {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.item-card:hover {
+.product-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.item-card h3 {
+.product-card h3 {
   margin: 0 0 10px;
   font-size: 1.5em;
   color: #333;
 }
 
-.item-card p {
+.product-card p {
   margin: 5px 0;
   color: #555;
 }
 
-.item-card .stock {
+.product-card .stock {
   font-weight: bold;
   color: #2c3e50;
 }
 
-.item-card .buttons {
+.product-card .buttons {
   display: flex;
   gap: 10px;
   margin-top: 10px;
 }
 
-.item-card button {
+.product-card button {
   padding: 10px 15px;
   border: none;
   border-radius: 4px;
@@ -70,25 +73,25 @@ export default {
   transition: background-color 0.2s;
 }
 
-.item-card button:hover {
+.product-card button:hover {
   background-color: #ddd;
 }
 
-.item-card button.edit {
+.product-card button.edit {
   background-color: #fed86e;
   color: white;
 }
 
-.item-card button.edit:hover {
+.product-card button.edit:hover {
   background-color: #bca052;
 }
 
-.item-card button.delete {
+.product-card button.delete {
   background-color: #df3636;
   color: white;
 }
 
-.item-card button.delete:hover {
+.product-card button.delete:hover {
   background-color: #bb3232;
 }
 </style>

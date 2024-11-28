@@ -3,20 +3,26 @@
     <div class="scrollable-content">
       <Dashboard v-if="currentComponent === 'dashboard'" />
       <ItemList
-        v-if="currentComponent === 'items'"
-        @edit-item="showEditForm"
-        @add-item="showAddForm"
+        v-if="currentComponent === 'products'"
+        @edit-product="showEditForm"
+        @add-product="showAddForm"
       />
       <UserList v-if="currentComponent === 'users'" />
       <TransactionList v-if="currentComponent === 'transactions'" />
+      <Profile v-if="currentComponent === 'profile'" />
+      <Label v-if="currentComponent === 'label'" />
     </div>
     <Modal
       v-if="showForm"
       :isVisible="showForm"
       @close="canceledEditForm"
-      :title="isEdit ? 'Edit Item' : 'Add Item'"
+      :title="isEdit ? 'Edit product' : 'Add product'"
     >
-      <ItemForm :item="selectedItem" :isEdit="isEdit" @submit="handleSubmit" />
+      <ItemForm
+        :product="selectedproduct"
+        :isEdit="isEdit"
+        @submit="handleSubmit"
+      />
     </Modal>
   </div>
 </template>
@@ -26,8 +32,10 @@ import ItemList from "@/components/admin/item/ItemList.vue";
 import ItemForm from "@/components/admin/item/ItemForm.vue";
 import UserList from "@/components/admin/user/UserList.vue";
 import TransactionList from "@/components/admin/transaction/TransactionList.vue";
+import Profile from "@/components/admin/profile/Profile.vue";
 import Modal from "@/components/Modal.vue";
 import Dashboard from "@/components/admin/dashboard/dashboard.vue";
+import Label from "@/components/admin/label/Label.vue";
 
 export default {
   components: {
@@ -37,6 +45,8 @@ export default {
     UserList,
     TransactionList,
     Modal,
+    Label,
+    Profile,
   },
 
   props: {
@@ -49,30 +59,30 @@ export default {
   data() {
     return {
       showForm: false,
-      selectedItem: null,
+      selectedproduct: null,
       isEdit: false,
     };
   },
 
   methods: {
-    showEditForm(item) {
-      this.selectedItem = item;
+    showEditForm(product) {
+      this.selectedproduct = product;
       this.isEdit = true;
       this.showForm = true;
     },
     showAddForm() {
-      this.selectedItem = null;
+      this.selectedproduct = null;
       this.isEdit = false;
       this.showForm = true;
     },
     handleSubmit(formData) {
       this.showForm = false;
-      this.selectedItem = null;
+      this.selectedproduct = null;
       this.isEdit = false;
     },
     canceledEditForm() {
       this.showForm = false;
-      this.selectedItem = null;
+      this.selectedproduct = null;
       this.isEdit = false;
     },
   },

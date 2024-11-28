@@ -1,13 +1,15 @@
 <template>
-  <div id="admin-view">
+  <div id="user-view">
     <div>
       <div class="scrollable-content">
         <ItemList
           v-if="currentComponent === 'items'"
           @edit-item="showEditForm"
         />
+        <UserList v-if="currentComponent === 'users'" />
         <TransactionList v-if="currentComponent === 'transactions'" />
         <HistoryList v-if="currentComponent === 'history'" />
+        <Profile v-if="currentComponent === 'profile'" />
       </div>
     </div>
     <div v-if="showForm" class="form-container">
@@ -24,15 +26,19 @@
 <script>
 import ItemList from "@/components/user/item/ItemList.vue";
 import ItemForm from "@/components/user/item/ItemForm.vue";
+import UserList from "@/components/admin/user/UserList.vue";
 import TransactionList from "@/components/user/transaction/TransactionList.vue";
+import Profile from "@/components/user/profile/Profile.vue";
 import HistoryList from "@/components/user/history/HistoryList.vue";
 
 export default {
   components: {
     ItemList,
     ItemForm,
+    UserList,
     TransactionList,
     HistoryList,
+    Profile,
   },
 
   props: {
@@ -76,7 +82,7 @@ export default {
 </script>
 
 <style scoped>
-.admin-view {
+.user-view {
   display: flex;
   flex-direction: column;
   height: 100%;

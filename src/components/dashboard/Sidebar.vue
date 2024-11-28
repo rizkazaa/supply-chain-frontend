@@ -25,7 +25,7 @@
         </button>
       </li>
 
-      <li v-if="currentRole === 'admin'">
+      <li v-if="currentRole === 'stakeholder'">
         <button
           @click="showComponent('users')"
           :class="{ active: activeComponent === 'users' }"
@@ -43,14 +43,14 @@
 
       <li>
         <button
-          @click="showComponent('items')"
-          :class="{ active: activeComponent === 'items' }"
+          @click="showComponent('products')"
+          :class="{ active: activeComponent === 'products' }"
         >
           <i
             class="fa-solid fa-box-archive"
             :class="{
-              'icon-active': activeComponent === 'items',
-              'icon-inactive': activeComponent !== 'items',
+              'icon-active': activeComponent === 'products',
+              'icon-inactive': activeComponent !== 'products',
             }"
           ></i>
           Products
@@ -73,7 +73,7 @@
         </button>
       </li>
 
-      <li v-if="currentRole == 'user'">
+      <!--<li v-if="currentRole == 'user'">
         <button
           @click="showComponent('history')"
           :class="{ active: activeComponent === 'history' }"
@@ -87,11 +87,11 @@
           ></i>
           History
         </button>
-      </li>
+      </li>-->
 
       <li>
         <button
-          @click="showComponent('transactions')"
+          @click="showComponent('label')"
           :class="{ active: activeComponent === 'label' }"
         >
           <i
@@ -107,7 +107,7 @@
 
       <li>
         <button
-          @click="showComponent('transactions')"
+          @click="showComponent('profile')"
           :class="{ active: activeComponent === 'profile' }"
         >
           <i
@@ -146,8 +146,7 @@ export default {
 
   methods: {
     showComponent(component) {
-      this.activeComponent = component;
-      this.$emit("showComponent", component);
+      this.$router.push({ name: this.currentRole, params: { component } });
     },
   },
 
@@ -211,7 +210,7 @@ button {
   cursor: pointer;
   font-size: 16px;
   display: flex;
-  align-items: center;
+  align-products: center;
   justify-content: flex-start;
   padding: 12px 35px;
   width: 100%;

@@ -7,16 +7,21 @@
       </div>
       <div class="role-selection">
         <button
-          @click="selectRole('admin')"
-          :class="{ active: currentRole === 'admin' }"
+          @click="selectRole('supplier')"
+          :class="{ active: currentRole === 'supplier' }"
         >
-          Admin
+          Supplier
         </button>
         <button
-          @click="selectRole('user')"
-          :class="{ active: currentRole === 'user' }"
+          @click="selectRole('stakeholder')"
+          :class="{ active: currentRole === 'stakeholder' }"
         >
-          User
+          Stakeholder
+        </button>
+      </div>
+      <div class="logout-container">
+        <button class="logout-btn btn btn-outline-light" @click="logout">
+          Logout
         </button>
       </div>
     </div>
@@ -45,19 +50,36 @@ export default {
     },
   },
 
-  watch: {
-    search(newQuery) {
-      EventBus.$emit("search", newQuery);
-    },
-  },
-
   methods: {
     selectRole(role) {
       this.$emit("update-role", role);
+
+      const authRole = localStorage.getItem("role");
+      const isAuthenticated = Boolean(localStorage.getItem("auth"));
+
+      if (isAuthenticated && authRole === role) {
+        this.$router.push({ name: role, params: { component: "items" } });
+      } else {
+        alert("You do not have permission to switch to this role.");
+        this.$router.push({ name: "login" });
+        this.$emit("toggle-sidebar", false);
+      }
     },
 
     toggleSidebar() {
       this.$emit("toggle-sidebar");
+    },
+
+    logout() {
+      localStorage.removeItem("auth");
+      localStorage.removeItem("role");
+      this.$emit("update-role", "supplier");
+      this.$emit("toggle-sidebar", false);
+      this.$router.push({ name: "login" });
+    },
+
+    emitSearch() {
+      EventBus.emit("search", this.search);
     },
   },
 };
