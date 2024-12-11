@@ -14,9 +14,6 @@
             v-model="searchQuery"
           />
         </div>
-        <button class="add-btn" @click="showAddForm">
-          <i class="fa-solid fa-plus icon"></i>Add Product
-        </button>
       </div>
 
       <div class="table-responsive">
@@ -75,14 +72,8 @@
               <td>{{ product.price }}</td>
               <td>{{ product.Quantity[0].quantity_of_product }}</td>
               <td class="d-flex justify-content-center">
-                <button class="edit-btn" @click="editProduct(product)">
+                <button class="submit-btn" @click="showAddForm(product)">
                   <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-                <button
-                  class="delete-btn"
-                  @click="deleteProduct(product.product_id)"
-                >
-                  <i class="fa-solid fa-trash"></i>
                 </button>
               </td>
             </tr>
@@ -143,7 +134,6 @@
         <Modal :visible="showForm" @close="cancelEditForm">
           <ItemForm
             :product="selectedproduct"
-            :isEdit="isEdit"
             @submit="handleSubmit"
             @cancel="cancelEditForm"
           />
@@ -158,8 +148,9 @@ import { computed, onMounted } from "vue";
 import { useProductStore } from "@/store/itemStore";
 import { useAuthStore } from "@/store/authStore";
 import Modal from "@/components/Modal.vue";
-import ItemForm from "@/components/admin/item/ItemForm.vue";
+import ItemForm from "@/components/user/item/ItemForm.vue";
 import eventBus from "@/utils/EventBus";
+import { useOrderStore } from "@/store/orderStore";
 
 export default {
   components: {
@@ -171,10 +162,11 @@ export default {
     let productStore = useProductStore();
     let authStore = useAuthStore();
     let products = computed(() => productStore.products);
+    let orderStore = useOrderStore();
 
     onMounted(() => {
       if (authStore.token) {
-        productStore.fetchProductsByUserId();
+        productStore.fetchProducts();
       } else {
         console.error("Product is not authenticated");
       }
@@ -183,9 +175,8 @@ export default {
     return {
       products,
       productStore,
+      orderStore,
       addProduct: productStore.addProduct,
-      updateProduct: productStore.updateProduct,
-      deleteProduct: productStore.deleteProduct,
     };
   },
 
@@ -193,7 +184,6 @@ export default {
     return {
       showForm: false,
       selectedproduct: null,
-      isEdit: false,
       currentPage: 1,
       productsPerPage: 5,
       searchQuery: "",
@@ -263,29 +253,21 @@ export default {
       }
     },
 
-    showAddForm() {
+    showAddForm(product) {
       this.selectedproduct = {
-        product_id: 0,
-        product_name: "",
-        quantity: 0,
+        ...product,
       };
       this.isEdit = false;
       this.showForm = true;
     },
 
-    editProduct(product) {
-      this.selectedproduct = { ...product };
-      this.isEdit = true;
-      this.showForm = true;
-    },
-
     async handleSubmit(product) {
-      if (this.isEdit) {
-        await this.productStore.updateProduct(product); // Memanggil action 'updateproduct' dari store
-      } else {
-        await this.productStore.addProduct(product); // Memanggil action 'addproduct' dari store
-      }
-
+      // if (this.isEdit) {
+      //   await this.productStore.updateProduct(product); // Memanggil action 'updateproduct' dari store
+      // } else {
+      //   await this.productStore.addProduct(product); // Memanggil action 'addproduct' dari store
+      // }
+      await this.orderStore.addOrder(product);
       await this.productStore.fetchProductsByUserId(); // Fetch latest users
       this.showForm = false;
     },

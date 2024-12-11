@@ -35,7 +35,7 @@ export const useOrderStore = defineStore("orderStore", {
     // Menambah order baru
     async addOrder(order) {
       try {
-        const response = await apiClient.post("/orders", order);
+        const response = await apiClient.post("/orders/order", order);
         // Optional: Menambahkan order yang baru ke dalam store setelah ditambahkan
         this.orders.push(response.data);
       } catch (error) {
