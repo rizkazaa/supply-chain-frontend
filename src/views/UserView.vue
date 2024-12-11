@@ -2,14 +2,16 @@
   <div id="user-view">
     <div>
       <div class="scrollable-content">
+        <Dashboard v-if="currentComponent === 'dashboard'" />
         <ItemList
-          v-if="currentComponent === 'items'"
+          v-if="currentComponent === 'products'"
           @edit-item="showEditForm"
         />
         <UserList v-if="currentComponent === 'users'" />
         <TransactionList v-if="currentComponent === 'transactions'" />
         <HistoryList v-if="currentComponent === 'history'" />
         <Profile v-if="currentComponent === 'profile'" />
+        <Label v-if="currentComponent === 'label'" />
       </div>
     </div>
     <div v-if="showForm" class="form-container">
@@ -30,9 +32,11 @@ import TransactionForm from "@/components/user/transaction/TransactionForm";
 import Profile from "@/components/user/profile/Profile.vue";
 import HistoryList from "@/components/user/history/HistoryList.vue";
 import TransactionList from "@/components/user/transaction/TransactionList.vue";
+import Dashboard from "@/components/user/dashboard/dashboard.vue";
 
 export default {
   components: {
+    Dashboard,
     ItemList,
     ItemForm,
     UserList,
@@ -52,30 +56,30 @@ export default {
   data() {
     return {
       showForm: false,
-      selectedItem: null,
+      selectedproduct: null,
       isEdit: false,
     };
   },
 
   methods: {
-    showEditForm(item) {
-      this.selectedItem = item;
+    showEditForm(product) {
+      this.selectedproduct = product;
       this.isEdit = true;
       this.showForm = true;
     },
     showAddForm() {
-      this.selectedItem = null;
+      this.selectedproduct = null;
       this.isEdit = false;
       this.showForm = true;
     },
     handleSubmit(formData) {
       this.showForm = false;
-      this.selectedItem = null;
+      this.selectedproduct = null;
       this.isEdit = false;
     },
     canceledEditForm() {
       this.showForm = false;
-      this.selectedItem = null;
+      this.selectedproduct = null;
       this.isEdit = false;
     },
   },

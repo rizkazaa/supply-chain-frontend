@@ -327,10 +327,7 @@ export default {
 
   methods: {
     getValueByKey(obj, key) {
-      return key.split(/[\.\[\]]+/).reduce((o, k) => {
-        if (!k) return o; // Abaikan kunci kosong akibat split
-        return o ? o[k] : undefined;
-      }, obj);
+      return key.split(".").reduce((o, k) => (o ? o[k] : undefined), obj);
     },
 
     sortTable(key) {

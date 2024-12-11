@@ -13,6 +13,7 @@
               v-model="authStore.username"
               id="username"
               class="form-control"
+              disabled
               required
             />
           </div>
@@ -23,6 +24,7 @@
               v-model="authStore.email"
               id="userEmail"
               class="form-control"
+              disabled
               required
             />
           </div>
@@ -35,6 +37,7 @@
               v-model="authStore.password"
               id="password"
               class="form-control"
+              disabled
               required
             />
           </div>
@@ -50,9 +53,9 @@
             />
           </div>
         </div>
-        <div class="button-container">
+        <!--<div class="button-container">
           <button type="submit" class="btn-success">Save Changes</button>
-        </div>
+        </div>-->
       </form>
     </div>
   </div>
