@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>{{ isEdit ? "Edit Product" : "Add Product" }}</h3>
+    <h3>Add Order</h3>
     <form @submit.prevent="submitForm" class="mb-3">
       <div class="mb-3">
         <label for="product_name" class="form-label">Product</label>
@@ -60,9 +60,10 @@ export default {
   data() {
     return {
       form: {
-        product_name: this.product.product_name,
-        price: 0,
-        quantity: 0,
+          id: this.product.id,
+          product_name: this.product.product_name,
+          price: this.product.price,
+          quantity: 0,
       },
     };
   },
@@ -70,11 +71,7 @@ export default {
     product: {
       immediate: true,
       handler(newProduct) {
-        this.form = {
-          product_name: "",
-          price: 0,
-          quantity: 0,
-        };
+        this.form = {...newProduct};
       },
     },
   },
