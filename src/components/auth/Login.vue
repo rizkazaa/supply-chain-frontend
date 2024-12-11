@@ -87,6 +87,12 @@ export default {
         authStore.setToken(token);
         authStore.setRole(role);
 
+        authStore.setUserData({
+          username: this.username,
+          email: this.email,
+          password: this.password,
+        });
+
         if (role === "STAKEHOLDER") {
           this.$router.push({ name: "stakeholder" });
         } else if (role === "SUPPLIER") {

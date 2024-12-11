@@ -1,10 +1,8 @@
 <template>
   <div class="profile">
-    <!--<h2 class="profile-title">Profile</h2>-->
     <div class="profile-card">
       <div class="header">
         <h2>Edit Profile</h2>
-        <button @click="logout" class="logout-button">Logout</button>
       </div>
       <form @submit.prevent="updateProfile">
         <div class="form-row">
@@ -12,7 +10,7 @@
             <label for="username" class="form-label">Username:</label>
             <input
               type="text"
-              v-model="userName"
+              v-model="authStore.username"
               id="username"
               class="form-control"
               required
@@ -22,7 +20,7 @@
             <label for="userEmail" class="form-label">Email:</label>
             <input
               type="email"
-              v-model="userEmail"
+              v-model="authStore.email"
               id="userEmail"
               class="form-control"
               required
@@ -32,28 +30,19 @@
         <div class="form-row">
           <div class="form-group">
             <label for="password" class="form-label">Password:</label>
-            <div class="password-group">
-              <input
-                type="password"
-                v-model="password"
-                id="password"
-                class="form-control"
-                required
-              />
-              <button
-                type="button"
-                @click="changePassword"
-                class="change-password-button"
-              >
-                Change
-              </button>
-            </div>
+            <input
+              type="password"
+              v-model="authStore.password"
+              id="password"
+              class="form-control"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="userRole" class="form-label">Role:</label>
             <input
               type="text"
-              v-model="userRole"
+              v-model="authStore.role"
               id="userRole"
               class="form-control"
               disabled
@@ -70,31 +59,26 @@
 </template>
 
 <script>
+import { useAuthStore } from "@/store/authStore";
+
 export default {
-  data() {
-    return {
-      userName: "John Doe",
-      userEmail: "johndoe@example.com",
-      password: "johndoe",
-      userRole: "Stakeholder",
-    };
+  setup() {
+    const authStore = useAuthStore();
+    return { authStore };
   },
+
   methods: {
     updateProfile() {
-      console.log("Profile updated:", {
-        userName: this.userName,
-        userEmail: this.userEmail,
-        password: this.password,
-        userRole: this.userRole,
+      console.log("Updated data:", {
+        username: this.authStore.username,
+        email: this.authStore.email,
       });
 
       alert("Profile updated successfully!");
     },
-    changePassword() {
-      alert("Change password logic goes here.");
-    },
     logout() {
-      alert("You have been logged out.");
+      this.authStore.logout();
+      this.$router.push({ name: "login" });
     },
   },
 };

@@ -11,6 +11,7 @@
             placeholder="Search"
             aria-label="Search"
             aria-describedby="search-addon"
+            v-model="searchQuery"
           />
         </div>
         <button class="add-btn" @click="showAddForm">
@@ -22,22 +23,58 @@
         <table>
           <thead>
             <tr>
+              <th>#</th>
               <th>Product ID</th>
-              <th>Product Name</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Stock</th>
+              <th @click="sortTable('product_name')">
+                Product Name
+                <span
+                  v-if="sortKey === 'product_name'"
+                  :class="{
+                    'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                    'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                    'fa-solid fa-sort sort-icon': sortDirection === '',
+                  }"
+                ></span>
+                <span v-else class="fa-solid fa-sort sort-icon"></span>
+              </th>
+              <th @click="sortTable('price')">
+                Price
+                <span
+                  v-if="sortKey === 'price'"
+                  :class="{
+                    'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                    'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                    'fa-solid fa-sort sort-icon': sortDirection === '',
+                  }"
+                ></span>
+                <span v-else class="fa-solid fa-sort sort-icon"></span>
+              </th>
+              <th @click="sortTable('Quantity[0].quantity_of_product')">
+                Stock
+                <span
+                  v-if="sortKey === 'Quantity[0].quantity_of_product'"
+                  :class="{
+                    'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                    'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                    'fa-solid fa-sort sort-icon': sortDirection === '',
+                  }"
+                ></span>
+                <span v-else class="fa-solid fa-sort sort-icon"></span>
+              </th>
               <th class="action-column">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="product in paginatedProducts" :key="product.product_id">
+            <tr
+              v-for="(product, index) in paginatedProducts"
+              :key="product.product_id"
+            >
+              <td>{{ (currentPage - 1) * productsPerPage + index + 1 }}</td>
               <td>{{ product.product_id }}</td>
               <td>{{ product.product_name }}</td>
-              <td>{{ product.category }}</td>
               <td>{{ product.price }}</td>
-              <td>{{ product.quantity_of_product }}</td>
-              <td class="action-buttons">
+              <td>{{ product.Quantity[0].quantity_of_product }}</td>
+              <td class="d-flex justify-content-center">
                 <button class="edit-btn" @click="editProduct(product)">
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>
@@ -54,6 +91,17 @@
 
         <nav aria-label="page-navigation-table">
           <ul class="pagination">
+            <div class="items-per-page">
+              <label for="itemsPerPage">Items per page: </label>
+              <select v-model="productsPerPage" id="itemsPerPage">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="10">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+
             <li class="page-product" :class="{ disabled: currentPage === 1 }">
               <a
                 class="page-link"
@@ -64,7 +112,7 @@
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            <li
+            <!--<li
               v-for="page in totalPages"
               :key="page"
               class="page-product"
@@ -73,7 +121,7 @@
               <a class="page-link" href="#" @click.prevent="changePage(page)">
                 {{ page }}
               </a>
-            </li>
+            </li>-->
             <li
               class="page-product"
               :class="{ disabled: currentPage === totalPages }"
@@ -106,15 +154,39 @@
 </template>
 
 <script>
+import { computed, onMounted } from "vue";
+import { useProductStore } from "@/store/itemStore";
+import { useAuthStore } from "@/store/authStore";
 import Modal from "@/components/Modal.vue";
 import ItemForm from "@/components/admin/item/ItemForm.vue";
-import { useProductStore } from "@/store/itemStore";
-import { EventBus } from "@/utils/EventBus";
+import eventBus from "@/utils/EventBus";
 
 export default {
   components: {
     Modal,
     ItemForm,
+  },
+
+  setup() {
+    let productStore = useProductStore();
+    let authStore = useAuthStore();
+    let products = computed(() => productStore.products);
+
+    onMounted(() => {
+      if (authStore.token) {
+        productStore.fetchProductsByUserId();
+      } else {
+        console.error("Product is not authenticated");
+      }
+    });
+
+    return {
+      products,
+      productStore,
+      addProduct: productStore.addProduct,
+      updateProduct: productStore.updateProduct,
+      deleteProduct: productStore.deleteProduct,
+    };
   },
 
   data() {
@@ -125,48 +197,77 @@ export default {
       currentPage: 1,
       productsPerPage: 5,
       searchQuery: "",
+      sortKey: "",
+      sortDirection: "asc",
     };
   },
 
   computed: {
-    // Menggunakan computed property untuk mengambil produk dari store
-    products() {
-      return this.itemStore.products; // Ambil dari store
+    paginatedProducts() {
+      let filteredProducts = this.products.filter((product) =>
+        product.product_name
+          .toLowerCase()
+          .includes(this.searchQuery.toLowerCase())
+      );
+
+      if (this.sortKey) {
+        filteredProducts.sort((a, b) => {
+          let aValue = this.getValueByKey(a, this.sortKey);
+          let bValue = this.getValueByKey(b, this.sortKey);
+
+          if (this.sortDirection === "asc") {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        });
+      }
+
+      return filteredProducts.slice(
+        (this.currentPage - 1) * this.productsPerPage,
+        this.currentPage * this.productsPerPage
+      );
     },
 
-    filteredProducts() {
-      return this.products.filter((product) => {
-        return (
-          (product.product_id &&
-            String(product.product_id)
-              .toLowerCase()
-              .includes(this.searchQuery.toLowerCase())) || // Pastikan product_id menjadi string
-          (product.product_name &&
-            product.product_name
-              .toLowerCase()
-              .includes(this.searchQuery.toLowerCase()))
-        );
-      });
+    totalStock() {
+      return this.products.reduce((sum, product) => {
+        // Gunakan jumlah stok yang relevan, misalnya:
+        return sum + (product.Quantity[0]?.quantity_of_product || 0);
+      }, 0);
     },
 
     totalPages() {
-      return Math.ceil(this.filteredProducts.length / this.productsPerPage); // Gunakan filteredProducts
-    },
-
-    paginatedProducts() {
-      const start = (this.currentPage - 1) * this.productsPerPage;
-      const end = start + this.productsPerPage;
-      return this.filteredProducts.slice(start, end); // Gunakan filteredProducts
+      return Math.ceil(
+        this.products.filter((product) =>
+          product.product_name
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
+        ).length / this.productsPerPage
+      );
     },
   },
 
   methods: {
+    getValueByKey(obj, key) {
+      return key
+        .split(/[\[\]\.]+/)
+        .reduce((o, k) => (o ? o[k] : undefined), obj);
+    },
+
+    sortTable(key) {
+      if (this.sortKey === key) {
+        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+      } else {
+        this.sortKey = key;
+        this.sortDirection = "asc";
+      }
+    },
+
     showAddForm() {
       this.selectedproduct = {
-        product_id: "",
+        product_id: 0,
         product_name: "",
-        category: "",
-        quantity_of_product: 0,
+        quantity: 0,
       };
       this.isEdit = false;
       this.showForm = true;
@@ -178,30 +279,24 @@ export default {
       this.showForm = true;
     },
 
-    handleSubmit(product) {
-      if (
-        product.product_id &&
-        product.product_name &&
-        product.category &&
-        product.quantity_of_product !== null &&
-        !isNaN(product.quantity_of_product)
-      ) {
-        if (this.isEdit) {
-          this.itemStore.updateProduct(product); // Memanggil action 'updateproduct' dari store
-        } else {
-          this.itemStore.addProduct(product); // Memanggil action 'addproduct' dari store
-        }
-
-        this.showForm = false;
+    async handleSubmit(product) {
+      if (this.isEdit) {
+        await this.productStore.updateProduct(product); // Memanggil action 'updateproduct' dari store
+      } else {
+        await this.productStore.addProduct(product); // Memanggil action 'addproduct' dari store
       }
+
+      await this.productStore.fetchProductsByUserId(); // Fetch latest users
+      this.showForm = false;
     },
 
     cancelEditForm() {
       this.showForm = false;
     },
 
-    deleteProduct(product_id) {
-      this.itemStore.deleteProduct(product_id); // Memanggil action 'deleteproduct' dari store
+    async deleteProduct(product_id) {
+      await this.productStore.deleteProduct(product_id); // Memanggil action 'deleteproduct' dari store
+      await this.productStore.fetchProductsByUserId(); // Fetch latest users
     },
 
     handleSearch(query) {
@@ -215,17 +310,12 @@ export default {
     },
   },
 
-  mounted() {
-    EventBus.on("search", this.handleSearch);
+  unmounted() {
+    eventBus.on("search", this.handleSearch);
   },
 
   beforeUnmount() {
-    EventBus.off("search", this.handleSearch);
-  },
-
-  setup() {
-    const itemStore = useProductStore();
-    return { itemStore };
+    eventBus.off("search", this.handleSearch);
   },
 };
 </script>
@@ -252,8 +342,18 @@ export default {
 .header {
   display: flex;
   justify-content: space-between;
-  align-products: center;
+  align-items: center;
   margin-bottom: 20px;
+}
+
+.sort-icon {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-size: 10px;
+}
+
+.sort-icon:hover {
+  color: #cbcbcb;
 }
 
 h2 {
@@ -359,7 +459,7 @@ button {
   width: 35px;
   height: 35px;
   display: flex;
-  align-products: center;
+  align-items: center;
   justify-content: center;
   margin-right: 4px;
 }
@@ -372,7 +472,7 @@ button {
   width: 35px;
   height: 35px;
   display: flex;
-  align-products: center;
+  align-items: center;
   justify-content: center;
 }
 
@@ -393,6 +493,37 @@ button {
   font-size: 14px;
   font-weight: 600px;
   border-radius: 6px;
+}
+
+.items-per-page {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.items-per-page label {
+  font-size: 14px;
+}
+
+.items-per-page select {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #736efe;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.items-per-page select:focus {
+  border-color: #736efe; /* Green border on focus */
+  outline: none;
+}
+
+.items-per-page select option {
+  padding: 10px;
+  font-size: 14px;
 }
 
 .page-link:hover {
@@ -420,7 +551,7 @@ button {
   .action-buttons {
     display: flex;
     flex-direction: column;
-    align-products: stretch;
+    align-items: stretch;
   }
 
   .action-buttons button {

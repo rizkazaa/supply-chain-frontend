@@ -6,23 +6,22 @@
         <input type="search" placeholder="Search" class="search-bar" />
       </div>
       <div class="role-selection">
-        <button
-          @click="selectRole('supplier')"
-          :class="{ active: currentRole === 'supplier' }"
+        <select
+          @change="selectRole($event.target.value)"
+          :value="currentRole"
+          class="dropdown-select"
         >
-          Supplier
-        </button>
-        <button
-          @click="selectRole('stakeholder')"
-          :class="{ active: currentRole === 'stakeholder' }"
-        >
-          Stakeholder
-        </button>
+          <option value="supplier">Supplier</option>
+          <option value="stakeholder">Stakeholder</option>
+        </select>
       </div>
       <div class="logout-container">
-        <button class="logout-btn btn btn-outline-light" @click="logout">
+        <button class="dropdown-btn" @click="toggleLogoutDropdown">
           Logout
         </button>
+        <div v-if="showLogoutDropdown" class="logout-dropdown">
+          <button @click="logout">Confirm Logout</button>
+        </div>
       </div>
     </div>
   </header>

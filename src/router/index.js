@@ -6,6 +6,8 @@ import LoginView from "../views/LoginView.vue";
 import Login from "@/components/auth/Login.vue";
 import Register from "@/components/auth/Register.vue";
 import { useAuthStore } from "@/store/authStore";
+import TransactionList from "@/components/user/transaction/TransactionList.vue";
+import TransactionForm from "@/components/user/transaction/TransactionForm.vue";
 
 const routes = [
   {
@@ -42,6 +44,17 @@ const routes = [
     component: UserView,
     props: true,
     meta: { requiresAuth: true, role: "STAKEHOLDER" },
+  },
+
+  {
+    path: "/transactions",
+    name: "TransactionList",
+    component: TransactionList,
+  },
+  {
+    path: "/transactions/new",
+    name: "TransactionForm",
+    component: TransactionForm,
   },
 ];
 

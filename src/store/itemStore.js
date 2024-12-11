@@ -1,49 +1,52 @@
 import { defineStore } from "pinia";
+import apiClient from "@/plugins/axios";
 
-export const useProductStore = defineStore("product", {
+export const useProductStore = defineStore("productStore", {
   state: () => ({
-    products: [
-      {
-        product_id: "2024001",
-        product_name: "Acer Nitro 15 AN515-58",
-        category: "Intel Core i5 12500H, RTX 3050, RAM 8GB DDR4, LAYAR 15.6",
-        quantity_of_product: 80,
-      },
-      {
-        product_id: "2024002",
-        product_name: "Lenovo LOQ 15 15IRH8",
-        category: "Intel Core i5 13450H, RTX 3050, RAM 8GB DDR4, LAYAR 15.6",
-        quantity_of_product: 80,
-      },
-    ],
+    products: []
   }),
-  getters: {
-    getProductById: (state) => (product_id) => {
-      return state.products.find(
-        (product) => product.product_id === product_id
-      );
-    },
-    totalProducts: (state) => state.products.length,
-  },
   actions: {
-    addProduct(product) {
-      this.products.push(product);
+    async fetchProducts(){
+      try {
+        const response = await apiClient.get("/products");
+        this.products = response.data;
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      }
     },
-
-    updateProduct(updatedProduct) {
-      const index = this.products.findIndex(
-        (product) => product.product_id === updatedProduct.product_id
-      );
-
-      if (index !== -1) {
-        this.products[index] = updatedProduct;
+    async fetchProductsByUserId(){
+      try {
+        const response = await apiClient.get("/products/user");
+        this.products = response.data;
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
       }
     },
 
-    deleteProduct(product_id) {
-      this.products = this.products.filter(
-        (product) => product.product_id !== product_id
-      );
+    async addProduct(product) {
+      try {
+        const response = await apiClient.post("/products", product);
+      } catch (error) {
+        console.error("Failed to add product:", error.message);
+      }
+    },
+
+    async updateProduct(product) {
+      try {
+        const response = await apiClient.put(`/products/${product.product_id}`, product);
+      } catch (error) {
+        console.error("Failed to update product:", error);
+      }
+    },
+
+    async deleteProduct(id) {
+      try {
+        await apiClient.delete(`/products/${id}`);
+
+        this.products = this.products.filter((product) => product.id !== id);
+      } catch (error) {
+        console.error("Failed to delete user:", error);
+      }
     },
   },
   persist: true,

@@ -13,11 +13,10 @@
       </div>
     </div>
     <div v-if="showForm" class="form-container">
-      <ItemForm
-        :item="selectedItem"
+      <TransactionForm
+        :product="selectedproduct"
         :isEdit="isEdit"
         @submit="handleSubmit"
-        @cancel="canceledEditForm"
       />
     </div>
   </div>
@@ -27,15 +26,17 @@
 import ItemList from "@/components/user/item/ItemList.vue";
 import ItemForm from "@/components/user/item/ItemForm.vue";
 import UserList from "@/components/admin/user/UserList.vue";
-import TransactionList from "@/components/user/transaction/TransactionList.vue";
+import TransactionForm from "@/components/user/transaction/TransactionForm";
 import Profile from "@/components/user/profile/Profile.vue";
 import HistoryList from "@/components/user/history/HistoryList.vue";
+import TransactionList from "@/components/user/transaction/TransactionList.vue";
 
 export default {
   components: {
     ItemList,
     ItemForm,
     UserList,
+    TransactionForm,
     TransactionList,
     HistoryList,
     Profile,

@@ -155,7 +155,7 @@ export default {
 .header {
   display: flex;
   justify-content: space-between;
-  align-products: center;
+  align-items: center;
   margin-bottom: 20px;
 }
 

@@ -1,23 +1,7 @@
 <template>
   <div>
     <h3>{{ isEdit ? "Edit Product" : "Add Product" }}</h3>
-    <form
-      @submit.prevent="submitForm"
-      class="mb-3 p-3 shadow-sm bg-white rounded"
-    >
-      <div class="mb-3">
-        <label for="product_id" class="form-label">Product ID</label>
-
-        <input
-          type="number"
-          v-model="form.product_id"
-          id="product_id"
-          class="form-control"
-          :disabled="isEdit"
-          required
-        />
-      </div>
-
+    <form @submit.prevent="submitForm" class="mb-3">
       <div class="mb-3">
         <label for="product_name" class="form-label">Product</label>
 
@@ -31,24 +15,25 @@
       </div>
 
       <div class="mb-3">
-        <label for="category" class="form-label">Category</label>
+        <label for="price" class="form-label">price</label>
 
         <input
-          type="text"
-          v-model="form.category"
-          id="category"
+          type="number"
+          v-model="form.price"
+          id="quantity"
           class="form-control"
           required
         />
       </div>
 
       <div class="mb-3">
-        <label for="quantity_of_product" class="form-label">Quantity</label>
+        <label for="quantity" class="form-label">Quantity</label>
 
         <input
           type="number"
-          v-model="form.quantity_of_product"
-          id="quantity_of_product"
+          v-model="form.quantity"
+          :placeholder="form?.Quantity?.[0]?.quantity_of_product ?? 0"
+          id="quantity"
           class="form-control"
           required
         />
@@ -81,10 +66,9 @@ export default {
   data() {
     return {
       form: {
-        product_id: "",
         product_name: "",
-        category: "",
-        quantity_of_product: 0,
+        price: 0,
+        quantity: 0,
       },
     };
   },
@@ -96,10 +80,9 @@ export default {
           this.form = { ...newProduct };
         } else {
           this.form = {
-            product_id: "",
             product_name: "",
-            category: "",
-            quantity_of_product: 0,
+            price: 0,
+            quantity: 0,
           };
         }
       },
@@ -108,11 +91,10 @@ export default {
   methods: {
     submitForm() {
       if (
-        this.form.product_id &&
         this.form.product_name &&
-        this.form.category &&
-        this.form.quantity_of_product !== null &&
-        this.form.quantity_of_product !== undefined
+        this.form.price &&
+        this.form.quantity !== null &&
+        this.form.quantity !== undefined
       ) {
         this.$emit("submit", this.form);
       }
@@ -127,8 +109,7 @@ form {
   background-color: #fff;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
-  margin: 20px;
+  margin: 10px;
 }
 
 .mb-3 {

@@ -5,7 +5,7 @@
       <div class="card">
         <h3>Product Stock</h3>
         <div class="card-content">
-          <p>{{ productStock }}</p>
+          <p>{{ totalStock }}</p>
           <i class="fa-solid fa-box-open icon product-icon"></i>
         </div>
       </div>
@@ -51,6 +51,8 @@
 import BarChart from "@/components/admin/dashboard/BarChart.vue";
 import DatePicker from "@/components/admin/dashboard/Calendar.vue";
 import TransactionList from "@/components/admin/transaction/TransactionList.vue";
+import { computed, onMounted } from "vue";
+import { useProductStore } from "@/store/itemStore";
 
 export default {
   components: {
@@ -58,12 +60,28 @@ export default {
     DatePicker,
     TransactionList,
   },
-  data() {
+
+  setup() {
+    const productStore = useProductStore();
+
+    // Ambil data produk dari store
+    const products = computed(() => productStore.products);
+
+    // Hitung total stok
+    const totalStock = computed(() =>
+      products.value.reduce((sum, product) => {
+        const quantity = product.Quantity?.[0]?.quantity_of_product || 0;
+        return sum + quantity;
+      }, 0)
+    );
+
+    onMounted(() => {
+      productStore.fetchProductsByUserId(); // Pastikan data produk sudah di-fetch
+    });
+
     return {
-      productStock: 100, // Ganti dengan data nyata
-      totalOrders: 250, // Ganti dengan data nyata
-      completedOrders: 200, // Ganti dengan data nyata
-      pendingOrders: 50, // Ganti dengan data nyata
+      products,
+      totalStock,
     };
   },
 };

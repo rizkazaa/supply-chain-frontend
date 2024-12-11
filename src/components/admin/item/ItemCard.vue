@@ -1,5 +1,6 @@
 <template>
   <div class="product-card">
+    <h3>{{ product.product_id }}</h3>
     <h3>{{ product.product_name }}</h3>
     <p>{{ product.category }}</p>
     <p class="stock">quantity_of_product: {{ product.quantity_of_product }}</p>

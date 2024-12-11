@@ -13,8 +13,8 @@
             aria-describedby="search-addon"
           />
         </div>
-        <button class="add-btn" @click="showAddForm">
-          <i class="fa-solid fa-plus icon"></i>New Order
+        <button class="add-btn" @click="goToTransactionForm">
+          <i class="fa-solid fa-plus icon"></i> New Order
         </button>
       </div>
 
@@ -122,62 +122,7 @@ export default {
   },
   data() {
     return {
-      transactions: [
-        {
-          kode: "2024001",
-          namaKaryawan: "Budiono",
-          namaBarang: "Acer Nitro 15 AN515-58",
-          jumlahPinjam: 1,
-          tanggalPinjam: "Rp.9.000.000",
-          tanggalKembali: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          kode: "2024002",
-          namaKaryawan: "Sisil",
-          namaBarang: "Lenovo LOQ 15 15IRH8",
-          jumlahPinjam: 1,
-          tanggalPinjam: "Rp.6.000.000",
-          tanggalKembali: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          kode: "2024001",
-          namaKaryawan: "Budiono",
-          namaBarang: "Acer Nitro 15 AN515-58",
-          jumlahPinjam: 1,
-          tanggalPinjam: "Rp.9.000.000",
-          tanggalKembali: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          kode: "2024002",
-          namaKaryawan: "Sisil",
-          namaBarang: "Lenovo LOQ 15 15IRH8",
-          jumlahPinjam: 1,
-          tanggalPinjam: "Rp.6.000.000",
-          tanggalKembali: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          kode: "2024001",
-          namaKaryawan: "Budiono",
-          namaBarang: "Acer Nitro 15 AN515-58",
-          jumlahPinjam: 1,
-          tanggalPinjam: "Rp.9.000.000",
-          tanggalKembali: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          kode: "2024002",
-          namaKaryawan: "Sisil",
-          namaBarang: "Lenovo LOQ 15 15IRH8",
-          jumlahPinjam: 1,
-          tanggalPinjam: "Rp.6.000.000",
-          tanggalKembali: "2024-8-17",
-          status: "Pending",
-        },
-      ],
+      transactions: [],
       isModalVisible: false,
       form: {
         kode: "",
@@ -227,6 +172,10 @@ export default {
       this.transactions = this.transactions.filter(
         (transaction) => transaction.kode !== kode
       );
+    },
+
+    goToTransactionForm() {
+      this.$router.push("/transactions/new");
     },
 
     changePage(page) {
