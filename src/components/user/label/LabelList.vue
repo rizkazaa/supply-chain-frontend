@@ -1,9 +1,9 @@
 <template>
-  <div class="order">
-    <!--<h2 class="order-title">Order</h2>-->
-    <div class="order-list">
+  <div class="label">
+    <!--<h2 class="label-title">Label</h2>-->
+    <div class="label-list">
       <div class="header">
-        <h2>Order List</h2>
+        <h2>Label List</h2>
         <div class="search">
           <input
             type="search"
@@ -13,8 +13,8 @@
             aria-describedby="search-addon"
           />
         </div>
-        <!-- <button class="add-btn" @click="goToOrderForm">
-          <i class="fa-solid fa-plus icon"></i> New Order
+        <!-- <button class="add-btn" @click="goToLabelForm">
+          <i class="fa-solid fa-plus icon"></i> New Label
         </button> -->
       </div>
 
@@ -32,20 +32,20 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="order in paginatedOrders" :key="order.id">
-              <td>{{ order.order_id }}</td>
-              <td>{{ order.Master_Data?.product_name }}</td>
-              <td>{{ order.quantity }}</td>
-              <td>{{ order.total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
-              <td>{{ order.created_at.split('T')[0] }}</td>
-              <td>{{ order.status }}</td>
+            <tr v-for="label in paginatedLabels" :key="label.id">
+              <td>{{ label.label_id }}</td>
+              <td>{{ label.Master_Data?.product_name }}</td>
+              <td>{{ label.quantity }}</td>
+              <td>{{ label.total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
+              <td>{{ label.created_at.split('T')[0] }}</td>
+              <td>{{ label.status }}</td>
               <td class="action-buttons">
-                <!--<button class="verif-btn" @click="openModal(order)">
+                <!--<button class="verif-btn" @click="openModal(label)">
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>-->
                 <button
                   class="update-btn"
-                  @click="updateOrder(order.id)"
+                  @click="updateLabel(label.id)"
                 >
                   <i class="fa-solid fa-trash"></i>
                 </button>
@@ -115,11 +115,11 @@
 
 <script>
 import Modal from "@/components/Modal.vue"; // Impor modal baru
-import TransactionForm from "./TransactionForm.vue";
+import TransactionForm from "./LabelForm.vue";
 import { computed, onMounted } from "vue";
 import { useAuthStore } from "@/store/authStore";
 import eventBus from "@/utils/EventBus";
-import { useOrderStore } from "@/store/orderStore";
+import { useLabelStore } from "@/store/labelStore";
 
 export default {
   components: {
@@ -129,20 +129,20 @@ export default {
 
   setup() {
     let authStore = useAuthStore();
-    let orderStore = useOrderStore();
-    let orders = computed(() => orderStore.orders);
+    let labelStore = useLabelStore();
+    let labels = computed(() => labelStore.labels);
 
     onMounted(() => {
       if (authStore.token) {
-        orderStore.fetchOrders();
+        labelStore.fetchLabels();
       } else {
-        console.error("Orders is not authenticated");
+        console.error("Labels is not authenticated");
       }
     });
 
     return {
-      orders,
-      orderStore,
+      labels,
+      labelStore,
     };
   },
 
@@ -154,26 +154,26 @@ export default {
         status: "",
       },
       currentPage: 1,
-      ordersPerPage: 5,
+      labelsPerPage: 5,
     };
   },
 
   computed: {
     totalPages() {
-      return Math.ceil(this.orders.length / this.ordersPerPage);
+      return Math.ceil(this.labels.length / this.labelsPerPage);
     },
 
-    paginatedOrders() {
-      const start = (this.currentPage - 1) * this.ordersPerPage;
-      const end = start + this.ordersPerPage;
-      return this.orders.slice(start, end);
+    paginatedLabels() {
+      const start = (this.currentPage - 1) * this.labelsPerPage;
+      const end = start + this.labelsPerPage;
+      return this.labels.slice(start, end);
     },
   },
 
   methods: {
-    openModal(order) {
-      if (this.form.id !== order.id) {
-        this.form = { ...order };
+    openModal(label) {
+      if (this.form.id !== label.id) {
+        this.form = { ...label };
         this.isModalVisible = true;
       }
     },
@@ -184,23 +184,23 @@ export default {
     },
 
     // updateStatus() {
-    //   const index = this.orders.findIndex(
-    //     (order) => order.id === this.form.id
+    //   const index = this.labels.findIndex(
+    //     (label) => label.id === this.form.id
     //   );
     //   if (index !== -1) {
-    //     this.orders[index].status = this.form.status;
+    //     this.labels[index].status = this.form.status;
     //   }
     //   this.closeModal();
     // },
 
-    updateOrder(id) {
-      this.orders = this.orders.filter(
-        (order) => order.id !== id
+    updateLabel(id) {
+      this.labels = this.labels.filter(
+        (label) => label.id !== id
       );
     },
 
-    // goToOrderForm() {
-    //   this.$router.push("/orders/new");
+    // goToLabelForm() {
+    //   this.$router.push("/labels/new");
     // },
 
     changePage(page) {
@@ -220,7 +220,7 @@ export default {
 </script>
 
 <style scoped>
-.order {
+.label {
   padding: 20px;
 }
 
@@ -231,13 +231,13 @@ h3 {
   font-size: 32px;
 }
 
-.order-title {
+.label-title {
   font-size: 32px;
   font-weight: bold;
   color: #736efe;
 }
 
-.order-list {
+.label-list {
   padding: 40px;
   background-color: #fff;
   border-radius: 8px;

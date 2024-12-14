@@ -2,9 +2,9 @@
   <div :class="['label-container', { compact: isCompact }]">
     <!-- Container untuk order-info dan logo -->
     <div class="header-container">
-      <div class="order-info">
-        <p><strong>Order No :</strong> {{ order.product_id }}</p>
-        <p><strong>Stakeholder :</strong> {{ order.user_id }}</p>
+      <div class="label-info">
+        <p><strong>Order No :</strong> {{ label.product_id }}</p>
+        <p><strong>Supplier ID :</strong> {{ label.user_id }}</p>
       </div>
       <div class="logo">
         <img
@@ -16,7 +16,9 @@
     </div>
 
     <div class="barcode-section">
-      <img src="@/assets/barcode.jpeg" alt="Barcode" />
+      <pre>
+        {{ qrCode }}
+      </pre>
     </div>
 
     <table class="product-table">
@@ -30,8 +32,8 @@
       <tbody>
         <tr>
           <td>1</td>
-          <td>{{ order.product_name }}</td>
-          <td>{{ order.quantity }}</td>
+          <td>{{ label.Master_Data?.product_name }}</td>
+          <td>{{ label.Order?.quantity }}</td>
         </tr>
       </tbody>
     </table>
@@ -41,7 +43,7 @@
 <script>
 export default {
   props: {
-    order: {
+    label: {
       type: Object,
       required: true,
     },
@@ -50,6 +52,11 @@ export default {
       default: false,
     },
   },
+  computed: {
+      qrCode(){
+        return this.label.qr_code.replace("\n", "<br>")
+      }
+  }
 };
 </script>
 
@@ -73,7 +80,7 @@ export default {
   margin-top: 20px;
 }
 
-.order-info {
+.label-info {
   font-size: 14px;
   flex: 1;
   border-right: 1px solid black;
@@ -95,13 +102,14 @@ export default {
 
 .barcode-section {
   text-align: center;
-  margin: 30px;
+  margin: 0;
+  scale: 0.8;
 }
 
-.barcode-section img {
+/* .barcode-section img {
   width: 200px;
   height: 100px;
-}
+} */
 
 .product-table {
   width: 100%;

@@ -19,7 +19,7 @@
         <table>
           <thead>
             <tr>
-              <th>Product ID</th>
+              <th>Order ID</th>
               <th>Stakeholder</th>
               <th>Product Name</th>
               <th>Quantity</th>
@@ -32,19 +32,19 @@
           <tbody>
             <tr v-for="order in paginatedOrders" :key="order.order_id">
               <td>{{ order.order_id }}</td>
-              <td>{{ order.user_id }}</td>
-              <td>{{ order.product_name }}</td>
+              <td>{{ order.User?.username }}</td>
+              <td>{{ order.Master_Data?.product_name }}</td>
               <td>{{ order.quantity }}</td>
-              <td>{{ order.total }}</td>
-              <td>{{ order.created_at }}</td>
+              <td>{{ order.total?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
+              <td>{{ order.created_at?.split('T')[0] }}</td>
               <td>{{ order.status }}</td>
               <td class="action-buttons">
                 <button class="verif-btn" @click="openModal(order)">
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>
-                <button class="delete-btn" @click="deleteOrder(order.order_id)">
+                <!-- <button class="delete-btn" @click="deleteOrder(order.order_id)">
                   <i class="fa-solid fa-trash"></i>
-                </button>
+                </button> -->
               </td>
             </tr>
           </tbody>
@@ -95,10 +95,11 @@
         <h3>Update Status</h3>
         <div class="status-dropdown">
           <select v-model="form.status" required>
-            <option value="Pending">Pending</option>
-            <option value="On Process">On Process</option>
-            <option value="Done">Done</option>
-            <option value="Reject">Reject</option>
+            <option selected>{{ form.status }}</option>
+            <option value="PENDING">Pending</option>
+            <option value="ON_PROCESS">On Process</option>
+            <option value="DONE">Done</option>
+            <option value="REJECT">Reject</option>
           </select>
         </div>
         <div class="button-container">
@@ -111,69 +112,37 @@
 
 <script>
 import Modal from "@/components/Modal.vue"; // Impor modal baru
+import { computed, onMounted } from "vue";
+import { useAuthStore } from "@/store/authStore";
+import eventBus from "@/utils/EventBus";
+import { useOrderStore } from "@/store/orderStore"
 
 export default {
   components: {
     Modal,
   },
+
+  setup() {
+    let authStore = useAuthStore();
+    let orderStore = useOrderStore();
+    let orders = computed(() => orderStore.orders);
+
+    onMounted(() => {
+      if (authStore.token) {
+        orderStore.fetchOrdersByUserId();
+      } else {
+        console.error("Orders is not authenticated");
+      }
+    });
+
+    return {
+      orders,
+      orderStore,
+    };
+  },
+
   data() {
     return {
-      orders: [
-        {
-          order_id: "2024001",
-          user_id: "Budiono",
-          product_name: "Acer Nitro 15 AN515-58",
-          quantity: 1,
-          total: "Rp.9.000.000",
-          created_at: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          order_id: "2024002",
-          user_id: "Sisil",
-          product_name: "Lenovo LOQ 15 15IRH8",
-          quantity: 1,
-          total: "Rp.6.000.000",
-          created_at: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          order_id: "2024001",
-          user_id: "Budiono",
-          product_name: "Acer Nitro 15 AN515-58",
-          quantity: 1,
-          total: "Rp.9.000.000",
-          created_at: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          order_id: "2024002",
-          user_id: "Sisil",
-          product_name: "Lenovo LOQ 15 15IRH8",
-          quantity: 1,
-          total: "Rp.6.000.000",
-          created_at: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          order_id: "2024001",
-          user_id: "Budiono",
-          product_name: "Acer Nitro 15 AN515-58",
-          quantity: 1,
-          total: "Rp.9.000.000",
-          created_at: "2024-8-17",
-          status: "Pending",
-        },
-        {
-          order_id: "2024002",
-          user_id: "Sisil",
-          product_name: "Lenovo LOQ 15 15IRH8",
-          quantity: 1,
-          total: "Rp.6.000.000",
-          created_at: "2024-8-17",
-          status: "Pending",
-        },
-      ],
       isModalVisible: false,
       form: {
         order_id: "",
@@ -200,6 +169,7 @@ export default {
     openModal(order) {
       if (this.form.order_id !== order.order_id) {
         this.form = { ...order };
+        // console.log(this.form)
         this.isModalVisible = true;
       }
     },
@@ -209,13 +179,10 @@ export default {
       this.form = { order_id: "", status: "" };
     },
 
-    updateStatus() {
-      const index = this.orders.findIndex(
-        (order) => order.order_id === this.form.order_id
-      );
-      if (index !== -1) {
-        this.orders[index].status = this.form.status;
-      }
+    async updateStatus() {
+      console.log(this.form)
+      await this.orderStore.updateOrder(this.form)
+      await this.orderStore.fetchOrdersByUserId()
       this.closeModal();
     },
 
@@ -228,6 +195,13 @@ export default {
         this.currentPage = page;
       }
     },
+  },
+  unmounted() {
+    eventBus.on("search", this.handleSearch);
+  },
+
+  beforeUnmount() {
+    eventBus.off("search", this.handleSearch);
   },
 };
 </script>

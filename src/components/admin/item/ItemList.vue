@@ -72,8 +72,8 @@
               <td>{{ (currentPage - 1) * productsPerPage + index + 1 }}</td>
               <td>{{ product.product_id }}</td>
               <td>{{ product.product_name }}</td>
-              <td>{{ product.price }}</td>
-              <td>{{ product.Quantity[0].quantity_of_product }}</td>
+              <td>{{ product.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
+              <td>{{ product.Quantity[0]?.quantity_of_product }}</td>
               <td class="d-flex justify-content-center">
                 <button class="edit-btn" @click="editProduct(product)">
                   <i class="fa-solid fa-pen-to-square"></i>

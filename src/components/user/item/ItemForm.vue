@@ -10,7 +10,7 @@
           v-model="form.product_name"
           id="product_name"
           class="form-control"
-          required
+          readonly
         />
       </div>
 
@@ -22,7 +22,7 @@
           v-model="form.price"
           id="quantity"
           class="form-control"
-          required
+          readonly
         />
       </div>
 
@@ -32,7 +32,7 @@
         <input
           type="number"
           v-model="form.quantity"
-          :placeholder="form?.Quantity?.[0]?.quantity_of_product ?? 0"
+          :placeholder="form.quantity"
           id="quantity"
           class="form-control"
           required

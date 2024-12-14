@@ -63,9 +63,6 @@ export default {
     return {
       users,
       userStore,
-      addUser: userStore.addUser,
-      updateUser: userStore.updateUser,
-      deleteUser: userStore.deleteUser,
     };
   },
 
@@ -81,7 +78,7 @@ export default {
   computed: {
     filteredUsers() {
       return this.users.filter((user) =>
-        user.username.toLowerCase().includes(this.searchQuery.toLowerCase())
+        user.username?.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
   },
@@ -106,9 +103,9 @@ export default {
 
     async handleSubmit(user) {
       if (this.isEdit) {
-        await this.updateUser(user);
+        await this.userStore.updateUser(user);
       } else {
-        await this.addUser(user);
+        await this.userStore.addUser(user);
       }
 
       await this.userStore.fetchUsers(); // Fetch latest users

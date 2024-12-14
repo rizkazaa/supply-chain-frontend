@@ -2,6 +2,16 @@
   <div>
     <h3>{{ isEdit ? "Edit User" : "Add User" }}</h3>
     <form @submit.prevent="submitForm" class="user-form">
+
+        <input
+          type="text"
+          v-model="form.user_id"
+          id="user_id"
+          class="form-control"
+          hidden
+        />
+
+
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
 
@@ -26,7 +36,7 @@
         />
       </div>
 
-      <div v-if="!isEdit" class="mb-3">
+      <div class="mb-3">
         <label for="password" class="form-label">Password</label>
 
         <input
@@ -54,8 +64,21 @@
         <label for="role" class="form-label">Role</label>
         <select v-model="form.role" id="role" class="form-select" required>
           <option value="SUPPLIER">SUPPLIER</option>
-          <option value="STAKEHOLDER">SUPPLIER</option>
+          <option value="STAKEHOLDER">STAKEHOLDER</option>
         </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="confirmPassword" class="form-label">Category</label>
+
+        <input
+          type="text"
+          v-model="form.category"
+          id="category"
+          class="form-control"
+          :disabled="form.role == 'STAKEHOLDER'" 
+          required
+        />
       </div>
 
       <div v-if="form.error" class="alert alert-danger">{{ form.error }}</div>
@@ -68,7 +91,6 @@
 </template>
 
 <script>
-import axios from "@/plugins/axios";
 
 export default {
   props: {
@@ -86,11 +108,13 @@ export default {
   data() {
     return {
       form: {
+        user_id: 0,
         username: "",
         email: "",
         password: "",
         confirmPassword: "",
-        role: "STAKEHOLDER",
+        role: "",
+        category: "",
         error: "",
       },
     };
@@ -103,9 +127,11 @@ export default {
       handler(newUser) {
         if (this.isEdit) {
           this.form = {
+            user_id: newUser.user_id,
             username: newUser.username,
             email: newUser.email,
             role: newUser.role,
+            category: newUser.category ? newUser.category : ''
           };
         } else {
           this.resetForm();
@@ -117,11 +143,13 @@ export default {
   methods: {
     resetForm() {
       this.form = {
+        user_id: 0,
         username: "",
         email: "",
         password: "",
         confirmPassword: "",
-        role: "STAKEHOLDER",
+        role: "",
+        category: "",
         error: "",
       };
     },
@@ -139,22 +167,16 @@ export default {
         this.form.error = "";
 
         const payload = {
+          user_id: this.form.user_id,
           username: this.form.username,
           email: this.form.email,
           password: this.form.password,
           role: this.form.role,
+          category: this.form.category ? this.form.category : ''
         };
 
         console.log("Sending data to server:", payload);
-
-        if (this.isEdit) {
-          await axios.patch(`/users/${this.user.id}`, payload);
-        } else {
-          const response = await axios.post("/users", payload);
-          console.log("User created:", response.data);
-        }
-
-        this.$emit("submit", this.form);
+        this.$emit("submit", payload);
 
         this.resetForm();
       } catch (error) {

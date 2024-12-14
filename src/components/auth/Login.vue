@@ -94,9 +94,9 @@ export default {
         });
 
         if (role === "STAKEHOLDER") {
-          this.$router.push({ name: "stakeholder" });
+          this.$router.push({ name: "stakeholder", params: {component: 'dashboard'} });
         } else if (role === "SUPPLIER") {
-          this.$router.push({ name: "supplier" });
+          this.$router.push({ name: "supplier", params: {component: 'dashboard'} });
         }
       } catch (error) {
         this.error = error.message;

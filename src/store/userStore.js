@@ -29,7 +29,7 @@ export const useUserStore = defineStore("userStore", {
 
     async updateUser(user) {
       try {
-        const response = await apiClient.patch(`/users/${user.id}`, user);
+        const response = await apiClient.patch(`/users/${user.user_id}`, user);
         const index = this.users.findIndex((u) => u.id === user.id);
 
         if (index !== -1) {

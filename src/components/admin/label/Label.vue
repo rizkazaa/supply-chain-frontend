@@ -28,16 +28,16 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in paginatedOrders" :key="order.order_id">
-            <td>{{ order.order_id }}</td>
-            <td>{{ order.user_id }}</td>
-            <td>{{ order.product_name }}</td>
-            <td>{{ order.quantity }}</td>
-            <td>{{ order.total }}</td>
-            <td>{{ order.created_at }}</td>
-            <td>{{ order.status }}</td>
+          <tr v-for="label in paginatedLabels" :key="label.label_id">
+            <td>{{ label.Master_Data?.product_id }}</td>
+            <td>{{ label.User?.username }}</td>
+            <td>{{ label.Master_Data?.product_name }}</td>
+            <td>{{ label.Order?.quantity }}</td>
+            <td>{{ label.Order?.total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
+            <td>{{ label.created_at.split('T')[0] }}</td>
+            <td>{{ label.Order?.status }}</td>
             <td>
-              <button class="verif-btn" @click="openModal(order)">
+              <button class="verif-btn" @click="openModal(label)">
                 <i class="fa-solid fa-print"></i>
               </button>
             </td>
@@ -85,7 +85,7 @@
     </div>
 
     <Modal :visible="isModalVisible" @close="closeModal">
-      <LabelOrder :order="selectedOrder" :isCompact="true" />
+      <LabelOrder :label="selectedLabel" :isCompact="true" />
       <div class="button-container">
         <button type="submit" class="btn-success">Print</button>
       </div>
@@ -96,35 +96,39 @@
 <script>
 import Modal from "@/components/Modal.vue";
 import LabelOrder from "@/components/admin/label/LabelOrder.vue";
+import { computed, onMounted } from "vue";
+import { useAuthStore } from "@/store/authStore";
+import eventBus from "@/utils/EventBus";
+import { useLabelStore } from "@/store/labelStore";
 
 export default {
   components: {
     Modal,
     LabelOrder,
   },
+
+  setup() {
+    let authStore = useAuthStore();
+    let labelStore = useLabelStore();
+    let labels = computed(() => labelStore.labels);
+
+    onMounted(() => {
+      if (authStore.token) {
+        labelStore.fetchLabelsByUserId();
+      } else {
+        console.error("Labels is not authenticated");
+      }
+    });
+
+    return {
+      labels,
+      labelStore,
+    };
+  },
+
   data() {
     return {
-      paginatedOrders: [
-        {
-          order_id: "2024001",
-          user_id: "Budiono",
-          product_name: "Acer Nitro 15 AN515-58",
-          quantity: 1,
-          total: "Rp.9.000.000",
-          created_at: "2024-8-17",
-          status: "Borrowed",
-        },
-        {
-          order_id: "2024002",
-          user_id: "Sisil",
-          product_name: "Lenovo LOQ 15 15IRH8",
-          quantity: 1,
-          total: "Rp.6.000.000",
-          created_at: "2024-8-17",
-          status: "Borrowed",
-        },
-      ],
-      selectedOrder: null,
+      selectedLabel: null,
       isModalVisible: false,
       currentPage: 1,
       labelPerPage: 5,
@@ -133,30 +137,37 @@ export default {
 
   computed: {
     quantityPages() {
-      return Math.ceil(this.paginatedOrders.length / this.labelPerPage);
+      return Math.ceil(this.labels.length / this.labelPerPage);
     },
 
-    paginatedItems() {
+    paginatedLabels() {
       const start = (this.currentPage - 1) * this.labelPerPage;
       const end = start + this.labelPerPage;
-      return this.paginatedOrders.slice(start, end);
+      return this.labels.slice(start, end);
     },
   },
 
   methods: {
-    openModal(order) {
-      this.selectedOrder = order;
+    openModal(label) {
+      this.selectedLabel = { ...label };
       this.isModalVisible = true;
     },
     closeModal() {
       this.isModalVisible = false;
-      this.selectedOrder = null;
+      this.selectedLabel = null;
     },
     changePage(page) {
       if (page >= 1 && page <= this.quantityPages) {
         this.currentPage = page;
       }
     },
+  },
+  unmounted() {
+    eventBus.on("search", this.handleSearch);
+  },
+
+  beforeUnmount() {
+    eventBus.off("search", this.handleSearch);
   },
 };
 </script>

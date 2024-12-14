@@ -6,6 +6,7 @@
     </div>
     <div class="card-body">
       <p><strong>Email:</strong> {{ user.email }}</p>
+      <p v-if="user.category"><strong>Category:</strong> {{ user.category }}</p>
     </div>
     <div class="card-footer">
       <button class="edit-btn" @click="editUser">Edit</button>

@@ -20,9 +20,9 @@ export const useOrderStore = defineStore("orderStore", {
     },
 
     // Fetch orders berdasarkan ID user (misalnya, jika orders terkait dengan user tertentu)
-    async fetchOrdersByUserId(userId) {
+    async fetchOrdersByUserId() {
       try {
-        const response = await apiClient.get(`/orders/user/${userId}`);
+        const response = await apiClient.get(`/orders/user`);
         this.orders = response.data;
       } catch (error) {
         console.error(
@@ -37,7 +37,7 @@ export const useOrderStore = defineStore("orderStore", {
       try {
         const response = await apiClient.post("/orders/order", order);
         // Optional: Menambahkan order yang baru ke dalam store setelah ditambahkan
-        this.orders.push(response.data);
+        // this.orders.push(response.data);
       } catch (error) {
         console.error(
           "Failed to add order:",
@@ -49,8 +49,8 @@ export const useOrderStore = defineStore("orderStore", {
     // Mengupdate order
     async updateOrder(order) {
       try {
-        const response = await apiClient.put(
-          `/orders/${order.order_id}`,
+        const response = await apiClient.patch(
+          `/orders/verify/${order.order_id}`,
           order
         );
         // Optional: Update state orders setelah update berhasil

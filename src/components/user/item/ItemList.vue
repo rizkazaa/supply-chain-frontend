@@ -69,8 +69,8 @@
               <td>{{ (currentPage - 1) * productsPerPage + index + 1 }}</td>
               <td>{{ product.product_id }}</td>
               <td>{{ product.product_name }}</td>
-              <td>{{ product.price }}</td>
-              <td>{{ product.Quantity[0].quantity_of_product }}</td>
+              <td>{{ product.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
+              <td>{{ product.Quantity[0]?.quantity_of_product }}</td>
               <td class="d-flex justify-content-center">
                 <button class="submit-btn" @click="showAddForm(product)">
                   <i class="fa-solid fa-pen-to-square"></i>
@@ -262,11 +262,6 @@ export default {
     },
 
     async handleSubmit(product) {
-      // if (this.isEdit) {
-      //   await this.productStore.updateProduct(product); // Memanggil action 'updateproduct' dari store
-      // } else {
-      //   await this.productStore.addProduct(product); // Memanggil action 'addproduct' dari store
-      // }
       await this.orderStore.addOrder(product);
       await this.productStore.fetchProductsByUserId(); // Fetch latest users
       this.showForm = false;
