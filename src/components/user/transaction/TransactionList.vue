@@ -13,9 +13,9 @@
             aria-describedby="search-addon"
           />
         </div>
-        <!-- <button class="add-btn" @click="goToOrderForm">
+        <button class="add-btn" @click="goToOrderForm">
           <i class="fa-solid fa-plus icon"></i> New Order
-        </button> -->
+        </button>
       </div>
 
       <div class="table-responsive">
@@ -199,9 +199,9 @@ export default {
       );
     },
 
-    // goToOrderForm() {
-    //   this.$router.push("/orders/new");
-    // },
+    goToOrderForm() {
+      this.$router.push("/transactions/new");
+    },
 
     changePage(page) {
       if (page >= 1 && page <= this.totalPages) {

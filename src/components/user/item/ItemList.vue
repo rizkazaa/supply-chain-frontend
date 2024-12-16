@@ -1,4 +1,5 @@
 <template>
+
   <div class="product">
     <!--<h2 class="product-title">Product</h2>-->
     <div class="product-list">
@@ -72,8 +73,12 @@
               <td>{{ product.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
               <td>{{ product.Quantity[0]?.quantity_of_product }}</td>
               <td class="d-flex justify-content-center">
-                <button class="submit-btn" @click="showAddForm(product)">
-                  <i class="fa-solid fa-pen-to-square"></i>
+                <button
+                    type="button"
+                    class="btn-select"
+                    @click="addProduct(product)"
+                  >
+                  Add
                 </button>
               </td>
             </tr>
@@ -140,11 +145,65 @@
         </Modal>
       </div>
     </div>
+
+          <div class="order-form">
+        <div class="mb-3" v-if="selectedProducts.length">
+          <div class="selected">
+            <h2>Selected Order</h2>
+          </div>
+          <table class="selected-products-table">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(product, index) in selectedProducts"
+                :key="product.product_id"
+              >
+                <td>{{ product.product_name }}</td>
+                <td>
+                  <input
+                    type="number"
+                    v-model.number="product.quantity"
+                    @input="updateTotalPrice"
+                    min="1"
+                  />
+                </td>
+                <td>{{ product.quantity * product.price }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn-remove"
+                    @click="removeProduct(index)"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- Total Harga Keseluruhan -->
+          <div class="mb-3">
+            <div for="total-price" class="form-label">
+              Grand Total:
+              <p class="form-price">{{ grandTotal.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</p>
+            </div>
+          </div>
+          <div class="button-container">
+            <button @click.prevent="submitOrder" class="btn btn-success">Submit</button>
+          </div>
+        </div>
+      </div>
   </div>
 </template>
 
 <script>
-import { computed, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useProductStore } from "@/store/itemStore";
 import { useAuthStore } from "@/store/authStore";
 import Modal from "@/components/Modal.vue";
@@ -153,37 +212,96 @@ import eventBus from "@/utils/EventBus";
 import { useOrderStore } from "@/store/orderStore";
 
 export default {
-  components: {
-    Modal,
-    ItemForm,
-  },
-
   setup() {
-    let productStore = useProductStore();
-    let authStore = useAuthStore();
-    let products = computed(() => productStore.products);
-    let orderStore = useOrderStore();
+    const authStore = useAuthStore();
+    const orderStore = useOrderStore();
+    const productStore = useProductStore();
+    const products = ref([]);
+    const searchQuery = ref("");
+    const selectedProducts = ref([]);
 
     onMounted(() => {
       if (authStore.token) {
-        productStore.fetchProducts();
+      productStore.fetchProductsByUserId();
+      products.value = productStore.products;
       } else {
-        console.error("Product is not authenticated");
+        console.error("Orders is not authenticated");
       }
     });
 
+    const grandTotal = computed(() =>
+      selectedProducts.value.reduce(
+        (total, product) => total + product.quantity * product.price,
+        0
+      )
+    );
+
+    const filteredProducts = computed(() =>
+      products.value.filter((product) =>
+        product.product_name
+          .toLowerCase()
+          .includes(searchQuery.value.toLowerCase())
+      )
+    );
+
+    // const fetchProducts = async () => {
+    //   await productStore.fetchProductsByUserId();
+    //   products.value = productStore.products;
+    // };
+
+    const addProduct = (product) => {
+      const existingProduct = selectedProducts.value.find(
+        (p) => p.product_id === product.product_id
+      );
+      if (existingProduct) {
+        alert("This product is already selected.");
+        return;
+      }
+      selectedProducts.value.push({ ...product, quantity: 1 });
+    };
+
+    const removeProduct = (index) => {
+      selectedProducts.value.splice(index, 1);
+    };
+
+    const submitOrder = async () => {
+      console.log(selectedProducts.value)
+      if (selectedProducts.value.length === 0) {
+        alert("Please select at least one product.");
+        return;
+      }
+      const orders = selectedProducts.value.map((product) => ({
+        product_id: product.product_id,
+        quantity: product.quantity,
+        total: product.quantity * product.price,
+        category: product.category,
+      }));
+      // await orderStore.addOrder({ orders });
+      alert("Order placed successfully!");
+      selectedProducts.value = [];
+
+      console.log(orders)
+      for(let order of orders){
+          // await productStore.fetchProductsByUserId();
+        await orderStore.addOrder(order);
+      }
+      await productStore.fetchProducts(); // Fetch latest users
+    };
+
+    const updateTotalPrice = () => {};
+
+
+    // onMounted(fetchProducts);
+
     return {
       products,
-      productStore,
-      orderStore,
-      addProduct: productStore.addProduct,
-    };
-  },
-
-  data() {
-    return {
-      showForm: false,
-      selectedproduct: null,
+      filteredProducts,
+      selectedProducts,
+      grandTotal,
+      addProduct,
+      removeProduct,
+      submitOrder,
+      updateTotalPrice,
       currentPage: 1,
       productsPerPage: 5,
       searchQuery: "",
@@ -239,9 +357,7 @@ export default {
 
   methods: {
     getValueByKey(obj, key) {
-      return key
-        .split(/[\[\]\.]+/)
-        .reduce((o, k) => (o ? o[k] : undefined), obj);
+      return key.split(".").reduce((o, k) => (o ? o[k] : undefined), obj);
     },
 
     sortTable(key) {
@@ -251,29 +367,6 @@ export default {
         this.sortKey = key;
         this.sortDirection = "asc";
       }
-    },
-
-    showAddForm(product) {
-      this.selectedproduct = {
-        ...product,
-      };
-      this.isEdit = false;
-      this.showForm = true;
-    },
-
-    async handleSubmit(product) {
-      await this.orderStore.addOrder(product);
-      await this.productStore.fetchProductsByUserId(); // Fetch latest users
-      this.showForm = false;
-    },
-
-    cancelEditForm() {
-      this.showForm = false;
-    },
-
-    async deleteProduct(product_id) {
-      await this.productStore.deleteProduct(product_id); // Memanggil action 'deleteproduct' dari store
-      await this.productStore.fetchProductsByUserId(); // Fetch latest users
     },
 
     handleSearch(query) {
@@ -286,29 +379,15 @@ export default {
       }
     },
   },
-
-  unmounted() {
-    eventBus.on("search", this.handleSearch);
-  },
-
-  beforeUnmount() {
-    eventBus.off("search", this.handleSearch);
-  },
 };
 </script>
 
 <style scoped>
-.product {
+.order {
   padding: 20px;
 }
 
-.product-title {
-  font-size: 32px;
-  font-weight: bold;
-  color: #736efe;
-}
-
-.product-list {
+.order-form {
   padding: 40px;
   background-color: #fff;
   border-radius: 8px;
@@ -323,52 +402,30 @@ export default {
   margin-bottom: 20px;
 }
 
-.sort-icon {
-  cursor: pointer;
-  transition: color 0.2s ease;
-  font-size: 10px;
-}
-
-.sort-icon:hover {
-  color: #cbcbcb;
+.selected {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 h2 {
   color: #736efe;
   font-size: 24px;
-  font-weight: 600;
+  font-weight: bold;
   margin-right: 350px;
 }
 
-.search {
-  flex: 1;
-  width: 100%;
-  margin-right: 10px;
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
 }
 
-.search input::placeholder {
+.search-input::placeholder {
   font-size: 14px;
   color: #cbcbcb;
-}
-
-.add-btn {
-  background-color: #736efe;
-  color: white;
-  padding: 10px 12px;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.add-btn:hover {
-  background-color: #615dd7;
-}
-
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
 }
 
 table {
@@ -396,61 +453,77 @@ th {
 tr:nth-child(even) {
   background-color: #f2f2f2;
 }
-
-tr:hover {
-  background-color: #dadada;
+.mb-3 {
+  margin-bottom: 1rem;
 }
 
-button {
-  padding: 6px 12px;
+.btn-select,
+.btn-remove {
+  background-color: #736efe;
   border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
   cursor: pointer;
-  border-radius: 6px;
+}
+
+.btn-success {
+  background-color: #736efe;
+  border-color: #736efe;
+  color: white;
+  width: 120px; /* Ukuran tombol */
+  height: 40px;
   font-size: 14px;
 }
 
-.edit-btn:hover {
-  background-color: #bca052;
+.btn-select:hover {
+  background-color: #615dd7;
 }
 
-.delete-btn:hover {
+.btn-remove {
+  background-color: #fe6e70;
+}
+
+.btn-remove:hover {
   background-color: #bb3232;
 }
 
-.icon {
-  margin-right: 8px;
-  font-size: 14px;
-  font-weight: 600;
+.search {
+  flex: 1;
+  width: 100%;
 }
 
-.action-buttons {
-  display: flex;
-  justify-content: center;
+.search-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.edit-btn {
-  color: #fed86e;
-  background-color: #fff4d5;
-  border-radius: 10px;
-  font-size: 14px;
-  width: 35px;
-  height: 35px;
+.form-label {
+  font-weight: bold;
+  color: #736efe;
+  font-size: 20px;
+  margin-top: 40px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 4px;
+  flex-direction: row;
 }
 
-.delete-btn {
-  color: #fe6e70;
-  background-color: #ffdfdf;
-  border-radius: 10px;
-  font-size: 14px;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.form-price {
+  font-weight: bold;
+  color: #736efe;
+  font-size: 20px;
+}
+
+.sort-icon {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-size: 10px;
+}
+
+.sort-icon:hover {
+  color: #cbcbcb;
 }
 
 .pagination {
@@ -517,22 +590,5 @@ button {
 .page-product.disabled .page-link {
   color: #cbcbcb; /* Warna abu-abu untuk halaman yang dinonaktifkan */
   border: 1px solid #cbcbcb; /* Border abu-abu */
-}
-
-@media (max-width: 600px) {
-  th,
-  td {
-    padding: 8px 10px;
-  }
-
-  .action-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .action-buttons button {
-    margin: 5px 0;
-  }
 }
 </style>
