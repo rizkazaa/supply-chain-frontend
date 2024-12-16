@@ -222,7 +222,7 @@ export default {
 
     onMounted(() => {
       if (authStore.token) {
-      productStore.fetchProductsByUserId();
+      productStore.fetchProducts();
       products.value = productStore.products;
       } else {
         console.error("Orders is not authenticated");
@@ -245,7 +245,7 @@ export default {
     );
 
     // const fetchProducts = async () => {
-    //   await productStore.fetchProductsByUserId();
+    //   await productStore.fetchProducts();
     //   products.value = productStore.products;
     // };
 
@@ -282,7 +282,7 @@ export default {
 
       console.log(orders)
       for(let order of orders){
-          // await productStore.fetchProductsByUserId();
+          // await productStore.fetchProducts();
         await orderStore.addOrder(order);
       }
       await productStore.fetchProducts(); // Fetch latest users
@@ -303,7 +303,7 @@ export default {
       submitOrder,
       updateTotalPrice,
       currentPage: 1,
-      productsPerPage: 5,
+      productsPerPage: 10,
       searchQuery: "",
       sortKey: "",
       sortDirection: "asc",
