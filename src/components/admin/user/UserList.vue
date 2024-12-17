@@ -3,18 +3,31 @@
     <div class="user-list">
       <div class="header">
         <h2>User List</h2>
-
-        <button class="add-btn" @click="showAddForm">Tambah Pengguna</button>
+        <button class="add-btn" @click="showAddForm">Add User</button>
       </div>
 
-      <div class="user-cards">
-        <UserCard
-          v-for="user in filteredUsers"
-          :key="user.id"
-          :user="user"
-          @edit-user="editUser"
-          @delete-user="handleDeleteUser"
-        />
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Username</th>
+              <th scope="col">Email</th>
+              <th scope="col">Role</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="user in filteredUsers" :key="user.id">
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.role }}</td>
+              <td>
+                <button class="edit-btn" @click="editUser(user)">Edit</button>
+                <button class="delete-btn" @click="handleDeleteUser(user.id)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <Modal :visible="showForm" @close="cancelEditForm">
@@ -33,16 +46,13 @@
 import { computed, onMounted } from "vue";
 import { useUserStore } from "@/store/userStore";
 import { useAuthStore } from "@/store/authStore";
-import UserCard from "@/components/admin/user/UserCard.vue";
 import Modal from "@/components/Modal.vue";
 import UserForm from "@/components/admin/user/UserForm.vue";
 import eventBus from "@/utils/EventBus";
 
 export default {
   name: "users",
-
   components: {
-    UserCard,
     Modal,
     UserForm,
   },
@@ -109,7 +119,6 @@ export default {
       }
 
       await this.userStore.fetchUsers(); // Fetch latest users
-
       this.showForm = false;
     },
 
@@ -118,7 +127,7 @@ export default {
     },
 
     async handleDeleteUser(id) {
-      await this.deleteUser(id);
+      await this.userStore.deleteUser(id);
       await this.userStore.fetchUsers(); // Fetch latest users
     },
 
@@ -141,6 +150,7 @@ export default {
 .user {
   padding: 20px;
 }
+
 .user-list {
   padding: 24px;
   background-color: #fff;
@@ -188,26 +198,20 @@ table {
 
 th,
 td {
-  border: 1px solid #ddd;
   padding: 12px 15px;
   text-align: center;
   vertical-align: middle;
+  font-size: 14px;
+  border-top: 0.5px solid #cbcbcb;
+  border-bottom: 0.5px solid #cbcbcb;
 }
 
 th {
   background-color: #736efe;
   color: white;
-  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 600;
 }
-
-tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-tr:hover {
-  background-color: #ddd;
-}
-
 button {
   padding: 6px 12px;
   border: none;
@@ -239,16 +243,6 @@ button {
   th,
   td {
     padding: 8px 10px;
-  }
-
-  .action-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .action-buttons button {
-    margin: 5px 0;
   }
 }
 </style>
