@@ -37,7 +37,7 @@ export const useOrderStore = defineStore("orderStore", {
       try {
         const response = await apiClient.post("/orders/order", order);
         // Optional: Menambahkan order yang baru ke dalam store setelah ditambahkan
-        // this.orders.push(response.data);
+        this.orders.push(response.data);
       } catch (error) {
         console.error(
           "Failed to add order:",
@@ -69,11 +69,43 @@ export const useOrderStore = defineStore("orderStore", {
     },
 
     // Menghapus order
-    async deleteOrder(orderId) {
+    async rejectOrder(order) {
+      console.log(order);
       try {
-        await apiClient.delete(`/orders/${orderId}`);
-        // Menghapus order dari state setelah berhasil dihapus
-        this.orders = this.orders.filter((order) => order.order_id !== orderId);
+        const response = await apiClient.post(
+          `/orders/reject/${order.order_id}`,
+          order
+        );
+        // Optional: Update state orders setelah update berhasil
+        const index = this.orders.findIndex(
+          (o) => o.order_id === order.order_id
+        );
+        if (index !== -1) {
+          this.orders[index] = response.data;
+        }
+      } catch (error) {
+        console.error(
+          "Failed to delete order:",
+          error.response?.data || error.message
+        );
+      }
+    },
+
+    // Menghapus order
+    async switchOrder(order) {
+      console.log(order);
+      try {
+        const response = await apiClient.patch(
+          `/orders/updateorder/${order.order_id}`,
+          order
+        );
+        // Optional: Update state orders setelah update berhasil
+        const index = this.orders.findIndex(
+          (o) => o.order_id === order.order_id
+        );
+        if (index !== -1) {
+          this.orders[index] = response.data;
+        }
       } catch (error) {
         console.error(
           "Failed to delete order:",

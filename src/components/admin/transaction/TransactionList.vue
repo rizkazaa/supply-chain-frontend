@@ -180,8 +180,12 @@ export default {
     },
 
     async updateStatus() {
-      console.log(this.form)
-      await this.orderStore.updateOrder(this.form)
+      if(this.form.status == 'REJECT'){
+        console.log(this.form)
+        await this.orderStore.rejectOrder(this.form)
+      }else {
+        await this.orderStore.updateOrder(this.form)
+      }
       await this.orderStore.fetchOrdersByUserId()
       this.closeModal();
     },

@@ -36,18 +36,16 @@
               <td>{{ order.order_id }}</td>
               <td>{{ order.Master_Data?.product_name }}</td>
               <td>{{ order.quantity }}</td>
-              <td>{{ order.total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
-              <td>{{ order.created_at.split('T')[0] }}</td>
+              <td>{{ order.total?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
+              <td>{{ order.created_at?.split('T')[0] }}</td>
               <td>{{ order.status }}</td>
               <td class="action-buttons">
-                <!--<button class="verif-btn" @click="openModal(order)">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>-->
                 <button
-                  class="update-btn"
-                  @click="updateOrder(order.id)"
+                  :disabled="order.status !== 'REJECT'"
+                  :class="order.status == 'REJECT' ? update-btn : 'bg-secondary-hustle'"
+                  @click="openModal(order)"
                 >
-                  <i class="fa-solid fa-trash"></i>
+                <i class="fa-solid fa-pen-to-square"></i>
                 </button>
               </td>
             </tr>
@@ -95,20 +93,7 @@
     </div>
 
     <Modal :visible="isModalVisible" :title="'Edit Status'" @close="closeModal">
-      <!-- <form @submit.prevent="updateStatus">
-        <h3>Update Status</h3>
-        <div class="status-dropdown">
-          <select v-model="form.status" required>
-            <option value="Pending">Pending</option>
-            <option value="On Process">On Process</option>
-            <option value="Done">Done</option>
-            <option value="Reject">Reject</option>
-          </select>
-        </div>
-        <div class="button-container">
-          <button type="submit" class="btn-success">Update</button>
-        </div>
-      </form> -->
+      <TransactionForm :products="products" :order="order" :form="form" @close="closeModal" @submit-form="updateOrder" />
     </Modal>
   </div>
 </template>
@@ -120,6 +105,7 @@ import { computed, onMounted } from "vue";
 import { useAuthStore } from "@/store/authStore";
 import eventBus from "@/utils/EventBus";
 import { useOrderStore } from "@/store/orderStore";
+import { useProductStore } from "@/store/itemStore";
 
 export default {
   components: {
@@ -130,11 +116,14 @@ export default {
   setup() {
     let authStore = useAuthStore();
     let orderStore = useOrderStore();
+    let productStore = useProductStore()
     let orders = computed(() => orderStore.orders);
+    let products = computed(() => productStore.products)
 
     onMounted(() => {
       if (authStore.token) {
         orderStore.fetchOrders();
+        productStore.fetchProducts();
       } else {
         console.error("Orders is not authenticated");
       }
@@ -143,18 +132,18 @@ export default {
     return {
       orders,
       orderStore,
+      products,
+      productStore
     };
   },
 
   data() {
     return {
       isModalVisible: false,
-      form: {
-        id: "",
-        status: "",
-      },
       currentPage: 1,
       ordersPerPage: 5,
+      form: {},
+      order: {}
     };
   },
 
@@ -172,10 +161,9 @@ export default {
 
   methods: {
     openModal(order) {
-      if (this.form.id !== order.id) {
-        this.form = { ...order };
-        this.isModalVisible = true;
-      }
+      this.form = { ...order };
+      this.order = order
+      this.isModalVisible = true;
     },
 
     closeModal() {
@@ -192,11 +180,11 @@ export default {
     //   }
     //   this.closeModal();
     // },
-
-    updateOrder(id) {
-      this.orders = this.orders.filter(
-        (order) => order.id !== id
-      );
+    
+    async updateOrder(order) {
+      await this.orderStore.switchOrder(order)
+      await this.orderStore.fetchOrders()
+      this.closeModal();
     },
 
     // goToOrderForm() {
@@ -347,12 +335,8 @@ button {
   border-color: #615dd7;
 }
 
-.verif-btn:hover {
-  background-color: #bca052;
-}
-
 .update-btn:hover {
-  background-color: #bb3232;
+  background-color: #bca052;
 }
 
 .icon {
@@ -365,7 +349,7 @@ button {
   align-items: center;
 }
 
-.verif-btn {
+.update-btn {
   color: #fed86e;
   background-color: #fff4d5;
   border-radius: 10px;
@@ -376,18 +360,6 @@ button {
   align-items: center;
   justify-content: center;
   margin-right: 4px;
-}
-
-.update-btn {
-  color: #fe6e70;
-  background-color: #ffdfdf;
-  border-radius: 10px;
-  font-size: 14px;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .status-dropdown {
