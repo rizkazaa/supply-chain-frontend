@@ -40,11 +40,11 @@ export const useUserStore = defineStore("userStore", {
       }
     },
 
-    async deleteUser(id) {
+    async deleteUser(user) {
       try {
-        await apiClient.delete(`/users/${id}`);
+        await apiClient.delete(`/users/${user.user_id}`);
 
-        this.users = this.users.filter((user) => user.id !== id);
+        this.users = this.users.filter((user) => user.user_id !== user.user_id);
       } catch (error) {
         console.error("Failed to delete user:", error);
       }

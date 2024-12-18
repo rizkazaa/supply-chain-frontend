@@ -10,10 +10,9 @@
             <label for="username" class="form-label">Username:</label>
             <input
               type="text"
-              v-model="authStore.username"
+              v-model="form.username"
               id="username"
               class="form-control"
-              disabled
               required
             />
           </div>
@@ -21,10 +20,9 @@
             <label for="userEmail" class="form-label">Email:</label>
             <input
               type="email"
-              v-model="authStore.email"
+              v-model="form.email"
               id="userEmail"
               class="form-control"
-              disabled
               required
             />
           </div>
@@ -34,49 +32,86 @@
             <label for="password" class="form-label">Password:</label>
             <input
               type="password"
-              v-model="authStore.password"
+              v-model="form.password"
               id="password"
               class="form-control"
-              disabled
               required
             />
           </div>
           <div class="form-group">
-            <label for="userRole" class="form-label">Role:</label>
+            <label for="role" class="form-label">Role:</label>
             <input
-              type="text"
-              v-model="authStore.role"
-              id="userRole"
+              type="role"
+              v-model="form.role"
+              id="password"
               class="form-control"
               disabled
+            />
+          </div>
+        </div>
+        <div class="form-row w-50">
+          <div class="form-group">
+            <label for="category" class="form-label">Category:</label>
+            <input
+              type="text"
+              v-model="form.category"
+              id="category"
+              class="form-control"
+              :disabled="form.role == 'STAKEHOLDER'"
               required
             />
           </div>
         </div>
-        <!--<div class="button-container">
-          <button type="submit" class="btn-success">Save Changes</button>
-        </div>-->
+        <div class="button-container">
+          <button type="submit" class="btn-success" @click.prevent="updateProfile" >Save Changes</button>
+        </div>
       </form>
     </div>
   </div>
 </template>
 
 <script>
+import { computed, onMounted } from "vue";
 import { useAuthStore } from "@/store/authStore";
+import { useProfileStore } from "@/store/profileStore";
 
 export default {
   setup() {
+    const profileStore = useProfileStore();
     const authStore = useAuthStore();
-    return { authStore };
+    const profiles = computed(() => profileStore.profiles);
+
+    onMounted(() => {
+      if (authStore.token) {
+        profileStore.fetchProfile();
+      } else {
+        console.error("User is not authenticated");
+      }
+    });
+
+      return {
+      profiles,
+      profileStore,
+    };
+  },
+
+  computed: {
+    form(){
+      return {
+        username: this.profiles.username,
+        email: this.profiles.email,
+        password: '',
+        role: this.profiles.role,
+        category: this.profiles.category,
+      }
+    }
   },
 
   methods: {
-    updateProfile() {
-      console.log("Updated data:", {
-        username: this.authStore.username,
-        email: this.authStore.email,
-      });
-
+    async updateProfile() {
+      console.log(this.form)
+      await this.profileStore.updateProfile(this.form);
+      await this.profileStore.fetchProfile(); // Fetch latest user profile
       alert("Profile updated successfully!");
     },
     logout() {
