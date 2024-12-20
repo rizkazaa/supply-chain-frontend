@@ -210,7 +210,7 @@ button {
   cursor: pointer;
   font-size: 16px;
   display: flex;
-  align-products: center;
+  align-items: center;
   justify-content: flex-start;
   padding: 12px 35px;
   width: 100%;

@@ -11,7 +11,7 @@
         <TransactionList v-if="currentComponent === 'transactions'" />
         <HistoryList v-if="currentComponent === 'history'" />
         <Profile v-if="currentComponent === 'profile'" />
-        <Label v-if="currentComponent === 'label'" />
+        <LabelList v-if="currentComponent === 'label'" />
       </div>
     </div>
     <div v-if="showForm" class="form-container">
@@ -29,6 +29,8 @@ import ItemList from "@/components/user/item/ItemList.vue";
 import ItemForm from "@/components/user/item/ItemForm.vue";
 import UserList from "@/components/admin/user/UserList.vue";
 import TransactionForm from "@/components/user/transaction/TransactionForm";
+import LabelList from "@/components/user/label/LabelList.vue";
+import LabelForm from "@/components/user/label/LabelForm.vue";
 import Profile from "@/components/user/profile/Profile.vue";
 import HistoryList from "@/components/user/history/HistoryList.vue";
 import TransactionList from "@/components/user/transaction/TransactionList.vue";
@@ -42,6 +44,8 @@ export default {
     UserList,
     TransactionForm,
     TransactionList,
+    LabelList,
+    LabelForm,
     HistoryList,
     Profile,
   },

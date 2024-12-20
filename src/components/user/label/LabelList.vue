@@ -35,19 +35,33 @@
             <tr v-for="label in paginatedLabels" :key="label.id">
               <td>{{ label.label_id }}</td>
               <td>{{ label.Master_Data?.product_name }}</td>
-              <td>{{ label.quantity }}</td>
-              <td>{{ label.total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
-              <td>{{ label.created_at.split('T')[0] }}</td>
-              <td>{{ label.status }}</td>
-              <td class="action-buttons">
+              <td>{{ label.Order?.quantity }}</td>
+              <td>
+                {{
+                  label.Order?.total.toLocaleString("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })
+                }}
+              </td>
+              <td>{{ label.created_at.split("T")[0] }}</td>
+              <td>
+                <span
+                  :class="{
+                    'done-status': label.Order?.status === 'DONE',
+                    'on-process-status': label.Order?.status === 'ON_PROCESS',
+                  }"
+                  >{{ label.Order?.status }}</span
+                >
+              </td>
+              <td>
                 <!--<button class="verif-btn" @click="openModal(label)">
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>-->
-                <button
-                  class="update-btn"
-                  @click="updateLabel(label.id)"
-                >
-                  <i class="fa-solid fa-trash"></i>
+                <button class="verif-btn" @click="openModal(label)">
+                  <i class="fa-solid fa-print icon"></i>
                 </button>
               </td>
             </tr>
@@ -95,6 +109,7 @@
     </div>
 
     <Modal :visible="isModalVisible" :title="'Edit Status'" @close="closeModal">
+      <LabelForm :label="selectedLabel" :isCompact="true" />
       <!-- <form @submit.prevent="updateStatus">
         <h3>Update Status</h3>
         <div class="status-dropdown">
@@ -114,8 +129,8 @@
 </template>
 
 <script>
-import Modal from "@/components/Modal.vue"; // Impor modal baru
-import TransactionForm from "./LabelForm.vue";
+import Modal from "@/components/Modal.vue";
+import LabelForm from "@/components/user/label/LabelForm.vue";
 import { computed, onMounted } from "vue";
 import { useAuthStore } from "@/store/authStore";
 import eventBus from "@/utils/EventBus";
@@ -124,7 +139,7 @@ import { useLabelStore } from "@/store/labelStore";
 export default {
   components: {
     Modal,
-    TransactionForm
+    LabelForm,
   },
 
   setup() {
@@ -148,60 +163,92 @@ export default {
 
   data() {
     return {
+      selectedLabel: null,
       isModalVisible: false,
-      form: {
-        id: "",
-        status: "",
-      },
       currentPage: 1,
       labelsPerPage: 5,
+      searchQuery: "",
+      sortKey: "",
+      sortDirection: "asc",
     };
   },
 
   computed: {
     totalPages() {
-      return Math.ceil(this.labels.length / this.labelsPerPage);
+      return Math.ceil(
+        this.labels.filter((label) =>
+          label.Master_Data?.product_name
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
+        ).length / this.labelsPerPage
+      );
     },
 
     paginatedLabels() {
-      const start = (this.currentPage - 1) * this.labelsPerPage;
-      const end = start + this.labelsPerPage;
-      return this.labels.slice(start, end);
+      let filteredLabels = this.labels.filter((label) =>
+        label.Master_Data?.product_name
+          .toLowerCase()
+          .includes(this.searchQuery.toLowerCase())
+      );
+
+      if (this.sortKey) {
+        filteredLabels.sort((a, b) => {
+          let aValue = this.getValueByKey(a, this.sortKey) || ""; // Pastikan nilai tidak undefined
+          let bValue = this.getValueByKey(b, this.sortKey) || ""; // Pastikan nilai tidak undefined
+
+          if (typeof aValue === "string") aValue = aValue.toLowerCase();
+          if (typeof bValue === "string") bValue = bValue.toLowerCase();
+
+          if (this.sortDirection === "asc") {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        });
+      }
+
+      return filteredLabels.slice(
+        (this.currentPage - 1) * this.labelsPerPage,
+        this.currentPage * this.labelsPerPage
+      );
+    },
+
+    totalPages() {
+      return Math.ceil(
+        this.labels.filter((label) =>
+          label.Master_Data?.product_name
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
+        ).length / this.labelsPerPage
+      );
     },
   },
 
   methods: {
     openModal(label) {
-      if (this.form.id !== label.id) {
-        this.form = { ...label };
-        this.isModalVisible = true;
-      }
+      this.selectedLabel = { ...label };
+      this.isModalVisible = true;
     },
 
     closeModal() {
       this.isModalVisible = false;
-      this.form = { id: "", status: "" };
+      this.selectedLabel = null;
     },
 
-    // updateStatus() {
-    //   const index = this.labels.findIndex(
-    //     (label) => label.id === this.form.id
-    //   );
-    //   if (index !== -1) {
-    //     this.labels[index].status = this.form.status;
-    //   }
-    //   this.closeModal();
-    // },
-
-    updateLabel(id) {
-      this.labels = this.labels.filter(
-        (label) => label.id !== id
-      );
+    getValueByKey(obj, key) {
+      return key
+        .split(/[\[\]\.]+/)
+        .reduce((o, k) => (o ? o[k] : undefined), obj);
     },
 
-    // goToLabelForm() {
-    //   this.$router.push("/labels/new");
-    // },
+    sortTable(key) {
+      if (this.sortKey === key) {
+        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+      } else {
+        this.sortKey = key;
+        this.sortDirection = "asc";
+      }
+    },
 
     changePage(page) {
       if (page >= 1 && page <= this.totalPages) {
@@ -224,25 +271,19 @@ export default {
   padding: 20px;
 }
 
-h3 {
-  color: #736efe;
-  font-weight: bold;
-  margin: 20px;
-  font-size: 32px;
+.label-container,
+.label-label {
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 }
 
 .label-title {
   font-size: 32px;
   font-weight: bold;
   color: #736efe;
-}
-
-.label-list {
-  padding: 40px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  margin: 20px 0;
 }
 
 .header {
@@ -262,37 +303,34 @@ h2 {
 .search {
   flex: 1;
   width: 100%;
-  margin-right: 10px;
 }
 
-.search input::placeholder {
+.search-input::placeholder {
   font-size: 14px;
   color: #cbcbcb;
 }
 
-.add-btn {
-  background-color: #736efe;
-  color: white;
-  padding: 10px 12px;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.add-btn:hover {
-  background-color: #615dd7;
-}
-
-.table-responsive {
+.search-input {
   width: 100%;
-  overflow-x: auto;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.sort-icon {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-size: 10px;
+}
+
+.sort-icon:hover {
+  color: #cbcbcb;
 }
 
 th,
@@ -301,7 +339,6 @@ td {
   border-bottom: 0.5px solid #cbcbcb;
   padding: 12px 15px;
   text-align: center;
-  vertical-align: middle;
   font-size: 14px;
 }
 
@@ -327,6 +364,13 @@ button {
   font-size: 14px;
 }
 
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 20px;
+}
+
 .btn-success {
   background-color: #736efe;
   border-color: #736efe;
@@ -335,86 +379,53 @@ button {
   height: 40px;
 }
 
-.button-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 20px 20px;
-}
-
 .btn-success:hover {
   background-color: #615dd7;
   border-color: #615dd7;
 }
-
-.verif-btn:hover {
-  background-color: #bca052;
-}
-
-.update-btn:hover {
-  background-color: #bb3232;
-}
-
 .icon {
-  margin-right: 8px;
-}
-
-.action-buttons {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .verif-btn {
-  color: #fed86e;
-  background-color: #fff4d5;
+  color: #77a4ff;
+  background-color: #dfeaff;
   border-radius: 10px;
   font-size: 14px;
   width: 35px;
   height: 35px;
-  display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 4px;
 }
 
-.update-btn {
-  color: #fe6e70;
-  background-color: #ffdfdf;
+.verif-btn:hover {
+  background-color: #6389d6;
+}
+
+.done-status {
+  color: #63d18b;
+  background-color: #d5ffe2;
+  font-size: 12px;
+  font-weight: bold;
   border-radius: 10px;
-  font-size: 14px;
-  width: 35px;
-  height: 35px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.status-dropdown {
+.on-process-status {
+  color: #77a4ff;
+  background-color: #dfeaff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
-  margin-top: 10px;
-}
-
-.status-dropdown select {
-  margin: 20px;
-  padding: 10px;
-  font-size: 16px;
-  width: 100%;
-  height: 40px;
-}
-
-.status-dropdown button {
-  padding: 6px 12px;
-  background-color: #736efe;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.status-dropdown button:hover {
-  background-color: #615dd7;
+  justify-content: center;
 }
 
 .pagination {
@@ -422,7 +433,7 @@ button {
   margin-top: 20px;
 }
 
-.page-item {
+.page-label {
   margin-left: 5px;
 }
 
@@ -436,18 +447,54 @@ button {
   border-radius: 6px;
 }
 
+.page-link:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.items-per-page {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.items-per-page label {
+  font-size: 14px;
+}
+
+.items-per-page select {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #736efe;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.items-per-page select:focus {
+  border-color: #736efe;
+  outline: none;
+}
+
+.items-per-page select option {
+  padding: 10px;
+  font-size: 14px;
+}
+
 .page-link:hover {
   background-color: #615dd7;
   color: white;
 }
 
-.page-item.active .page-link {
+.page-label.active .page-link {
   background-color: #736efe;
   color: white;
   border: 1px solid #736efe;
 }
 
-.page-item.disabled .page-link {
+.page-label.disabled .page-link {
   color: #cbcbcb;
   border: 1px solid #cbcbcb;
 }
@@ -458,14 +505,10 @@ button {
     padding: 8px 10px;
   }
 
-  .action-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .action-buttons button {
-    margin: 5px 0;
+  .verif-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
   }
 }
 </style>
