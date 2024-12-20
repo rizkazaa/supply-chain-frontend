@@ -2,25 +2,23 @@
   <header :class="{ expanded: !isSidebarVisible }">
     <button class="toggle-btn" @click="toggleSidebar">☰</button>
     <div class="header-content">
-      <div class="search-bar-container">
-        <input type="search" placeholder="Search" class="search-bar" />
-      </div>
       <div class="role-selection">
-        <select
-          @change="selectRole($event.target.value)"
-          :value="currentRole"
-          class="dropdown-select"
-        >
-          <option value="supplier">Supplier</option>
-          <option value="stakeholder">Stakeholder</option>
-        </select>
-      </div>
-      <div class="logout-container">
-        <button class="dropdown-btn" @click="toggleLogoutDropdown">
-          Logout
-        </button>
-        <div v-if="showLogoutDropdown" class="logout-dropdown">
-          <button @click="logout">Confirm Logout</button>
+        <div class="dropdown-container">
+          <button
+            class="for-dropdown role-button"
+            @click="toggleDropdown('roleDropdown')"
+          >
+            <i class="fa-solid fa-circle-user"></i>
+          </button>
+          <div v-if="roleDropdownVisible" class="section-dropdown">
+            <button class="role-selection" @click="selectRole('supplier')">
+              Supplier
+            </button>
+            <button class="role-selection" @click="selectRole('stakeholder')">
+              Stakeholder
+            </button>
+            <button class="logout-button" @click="confirmLogout">Logout</button>
+          </div>
         </div>
       </div>
     </div>
@@ -31,28 +29,35 @@
 import { EventBus } from "@/utils/EventBus";
 
 export default {
-  data() {
-    return {
-      search: "",
-    };
-  },
-
   props: {
     currentRole: {
       type: String,
       required: true,
     },
-
     isSidebarVisible: {
       type: Boolean,
       required: true,
     },
   },
-
+  data() {
+    return {
+      search: "",
+      roleDropdownVisible: false,
+      logoutDropdownVisible: false,
+    };
+  },
   methods: {
+    toggleSidebar() {
+      this.$emit("toggle-sidebar");
+    },
+    toggleDropdown(dropdown) {
+      if (dropdown === "roleDropdown") {
+        this.roleDropdownVisible = !this.roleDropdownVisible;
+        this.logoutDropdownVisible = false; // Close other dropdown
+      }
+    },
     selectRole(role) {
       this.$emit("update-role", role);
-
       const authRole = localStorage.getItem("role");
       const isAuthenticated = Boolean(localStorage.getItem("auth"));
 
@@ -60,15 +65,13 @@ export default {
         this.$router.push({ name: role, params: { component: "items" } });
       } else {
         alert("You do not have permission to switch to this role.");
-        this.$router.push({ name: "login" });
-        this.$emit("toggle-sidebar", false);
+        this.logout();
       }
     },
-
-    toggleSidebar() {
-      this.$emit("toggle-sidebar");
+    confirmLogout() {
+      alert("You have been logged out.");
+      this.logout();
     },
-
     logout() {
       localStorage.removeItem("auth");
       localStorage.removeItem("role");
@@ -76,7 +79,6 @@ export default {
       this.$emit("toggle-sidebar", false);
       this.$router.push({ name: "login" });
     },
-
     emitSearch() {
       EventBus.emit("search", this.search);
     },
@@ -116,54 +118,73 @@ header.expanded {
 
 .header-content {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   width: 100%;
-  max-width: 1200px;
+  max-width: 100%;
   align-items: center;
 }
 
-.search-bar-container {
-  display: flex;
-  justify-content: flex-end;
-  flex-grow: 1;
-  margin-right: 8px;
+.dropdown-container {
+  position: relative;
 }
 
-.search-bar {
-  padding: 8px 12px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  width: 250px;
+.for-dropdown {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border: none;
   font-size: 14px;
-  outline: none;
 }
 
-.role-selection {
-  display: flex;
-  justify-content: center;
-  padding: 10px;
-}
-
-button {
+.role-button {
   color: #736efe;
   background: none;
   border: none;
   cursor: pointer;
+  font-size: 24px;
+}
+
+.logout-button {
+  color: #ff6b6b;
+  border: none;
+  cursor: pointer;
   font-size: 14px;
-  margin: 0 10px;
-  padding: 5px 10px;
+  font-weight: 600;
 }
 
-button:hover {
-  background-color: #ffffff;
-  border-radius: 8px;
+.role-selection {
+  color: #736efe;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-button.active {
-  background-color: #736efe;
-  border-radius: 8px;
-  color: #ffffff;
+.section-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #cbcbcb;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
 }
+
+.section-dropdown button {
+  width: 100%;
+  padding: 10px 15px;
+  border: none;
+  background-color: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.section-dropdown button:hover {
+  background-color: #ddd;
+}
+
 @media (max-width: 768px) {
   header {
     width: 100%;
@@ -172,16 +193,6 @@ button.active {
 
   .header-content {
     flex-direction: column;
-  }
-
-  .search-bar-container {
-    margin-right: 0;
-    margin-bottom: 10px;
-    margin-top: 16px;
-  }
-
-  .toggle-btn {
-    display: block;
   }
 }
 </style>

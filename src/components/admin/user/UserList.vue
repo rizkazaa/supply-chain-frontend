@@ -27,7 +27,7 @@
                 </button>
                 <button
                   class="delete-btn"
-                  @click="handleDeleteUser(user.id)"
+                  @click="handleDeleteUser(user)"
                   title="Delete"
                 >
                   <i class="fa-solid fa-trash icon"></i>
@@ -134,8 +134,8 @@ export default {
       this.showForm = false;
     },
 
-    async handleDeleteUser(id) {
-      await this.userStore.deleteUser(id);
+    async handleDeleteUser() {
+      await this.userStore.deleteUser();
       await this.userStore.fetchUsers(); // Fetch latest users
     },
 
