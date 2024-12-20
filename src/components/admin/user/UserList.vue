@@ -22,8 +22,16 @@
               <td>{{ user.email }}</td>
               <td>{{ user.role }}</td>
               <td>
-                <button class="edit-btn" @click="editUser(user)">Edit</button>
-                <button class="delete-btn" @click="handleDeleteUser(user.id)">Delete</button>
+                <button class="edit-btn" @click="editUser(user)" title="Edit">
+                  <i class="fa-solid fa-pen-to-square icon"></i>
+                </button>
+                <button
+                  class="delete-btn"
+                  @click="handleDeleteUser(user.id)"
+                  title="Delete"
+                >
+                  <i class="fa-solid fa-trash icon"></i>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -185,6 +193,18 @@ h2 {
   background-color: #615dd7;
 }
 
+.bg-secondary-hustle {
+  color: #cbcbcb;
+  background-color: #eaeaea;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
+}
+
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -226,9 +246,15 @@ button {
 }
 
 .edit-btn {
-  background-color: #fed86e;
-  color: white;
-  margin-right: 5px;
+  color: #fed86e;
+  background-color: #fff4d5;
+  border-radius: 10px;
+  font-size: 14px;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
 }
 
 .edit-btn:hover {
@@ -236,8 +262,14 @@ button {
 }
 
 .delete-btn {
-  background-color: #df3636;
-  color: white;
+  color: #fe6e70;
+  background-color: #ffdfdf;
+  border-radius: 10px;
+  font-size: 14px;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
 }
 
 .delete-btn:hover {
