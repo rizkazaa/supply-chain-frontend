@@ -1,11 +1,10 @@
 <template>
-  <form @submit.prevent="submitOrder" class="p-3">
-    <h3 class="form-title mb-3">Order</h3>
-    <div class="row mb-3 align-items-center">
-      <div class="col-md-4">
-        <label for="productSelect" class="form-label label-style">Select Product:</label>
-      </div>
-      <div class="col-md-8">
+  <div>
+    <h3>Reorder</h3>
+    <form @submit.prevent="submitOrder" class="p-3">
+      <div class="mb-3">
+        <label for="productSelect" class="form-label">Select Product</label>
+
         <select
           v-model="form.product_id"
           id="productSelect"
@@ -22,12 +21,10 @@
           </option>
         </select>
       </div>
-    </div>
-    <div class="row mb-3 align-items-center">
-      <div class="col-md-4">
-        <label for="quantity" class="form-label label-style">Quantity</label>
-      </div>
-      <div class="col-md-8">
+
+      <div class="mb-3">
+        <label for="quantity" class="form-label">Quantity</label>
+
         <input
           type="number"
           v-model.number="form.quantity"
@@ -37,14 +34,22 @@
           required
         />
       </div>
-    </div>
-    <p class="form-price mb-3 label-style">
-      Total Price: {{ formPrice }}
-    </p>
-    <div class="text-center">
-      <button type="submit" class="btn btn-success">Buy</button>
-    </div>
-  </form>
+
+      <div class="mb-3">
+        <label for="totalPrice" class="form-label">Total Price</label>
+        <input
+          type="text"
+          id="totalPrice"
+          class="form-control"
+          :value="formPrice"
+          disabled
+        />
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-success">Save</button>
+      </div>
+    </form>
+  </div>
 </template>
 
 <script>
@@ -100,21 +105,76 @@ export default {
 </script>
 
 <style scoped>
-.form-price {
+form {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 10px;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.form-control {
+  border-radius: 4px;
+  border: 1px solid #cbcbcb;
+  color: #4b3f6b;
+  font-size: 14px;
+}
+
+.form-control:focus {
+  border-color: #4b3f6b;
+  box-shadow: 0 0 0 0.2rem rgba(75, 63, 107, 0.25);
+}
+
+.form-label {
   font-weight: bold;
   color: #736efe;
-  font-size: 16px;
+  font-size: 14px;
 }
 
-.label-style {
-  color: #736efe;
-  font-weight: 600;
-  font-size: 16px;
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 20px;
 }
 
-.form-title {
+.btn-success {
+  background-color: #736efe;
+  border-color: #736efe;
+  color: white;
+  width: 120px; /* Ukuran tombol */
+  height: 40px;
+  font-size: 14px;
+  gap: 10px;
+  margin: 20px 20px;
+}
+
+.btn-success:hover {
+  background-color: #615dd7;
+  border-color: #615dd7;
+}
+
+.btn-secondary {
+  background-color: #fe6e70;
+  border-color: #fe6e70;
+  color: white;
+  width: 120px; /* Ukuran tombol */
+  height: 40px;
+  font-size: 14px;
+}
+
+.btn-secondary:hover {
+  background-color: #bb3232;
+  border-color: #bb3232;
+}
+
+h3 {
   color: #736efe;
-  font-weight: 600;
+  font-weight: bold;
+  margin: 20px;
   font-size: 24px;
 }
 </style>

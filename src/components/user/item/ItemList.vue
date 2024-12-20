@@ -1,5 +1,4 @@
 <template>
-
   <div class="product">
     <!--<h2 class="product-title">Product</h2>-->
     <div class="product-list">
@@ -8,11 +7,11 @@
         <div class="search">
           <input
             type="search"
-            class="form-control rounded"
             placeholder="Search"
             aria-label="Search"
             aria-describedby="search-addon"
             v-model="searchQuery"
+            class="search-input"
           />
         </div>
       </div>
@@ -70,15 +69,24 @@
               <td>{{ (currentPage - 1) * productsPerPage + index + 1 }}</td>
               <td>{{ product.product_id }}</td>
               <td>{{ product.product_name }}</td>
-              <td>{{ product.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
+              <td>
+                {{
+                  product.price.toLocaleString("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })
+                }}
+              </td>
               <td>{{ product.Quantity[0]?.quantity_of_product }}</td>
-              <td class="d-flex justify-content-center">
+              <td>
                 <button
-                    type="button"
-                    class="btn-select"
-                    @click="addProduct(product)"
-                  >
-                  Add
+                  type="button"
+                  class="btn-select"
+                  @click="addProduct(product)"
+                >
+                  <i class="fa-solid fa-plus"></i>
                 </button>
               </td>
             </tr>
@@ -92,7 +100,7 @@
               <select v-model="productsPerPage" id="itemsPerPage">
                 <option value="5">5</option>
                 <option value="10">10</option>
-                <option value="10">25</option>
+                <option value="25">25</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
               </select>
@@ -146,59 +154,72 @@
       </div>
     </div>
 
-          <div class="order-form">
-        <div class="mb-3" v-if="selectedProducts.length">
-          <div class="selected">
-            <h2>Selected Order</h2>
-          </div>
-          <table class="selected-products-table">
-            <thead>
-              <tr>
-                <th>Product Name</th>
-                <th>Quantity</th>
-                <th>Total Price</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(product, index) in selectedProducts"
-                :key="product.product_id"
-              >
-                <td>{{ product.product_name }}</td>
-                <td>
-                  <input
-                    type="number"
-                    v-model.number="product.quantity"
-                    @input="updateTotalPrice"
-                    min="1"
-                  />
-                </td>
-                <td>{{ product.quantity * product.price }}</td>
-                <td>
-                  <button
-                    type="button"
-                    class="btn-remove"
-                    @click="removeProduct(index)"
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <!-- Total Harga Keseluruhan -->
-          <div class="mb-3">
-            <div for="total-price" class="form-label">
-              Grand Total:
-              <p class="form-price">{{ grandTotal.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</p>
-            </div>
-          </div>
-          <div class="button-container">
-            <button @click.prevent="submitOrder" class="btn btn-success">Submit</button>
+    <div class="order-form">
+      <div class="mb-3" v-if="selectedProducts.length">
+        <div class="selected">
+          <h2>Selected Order</h2>
+        </div>
+        <table class="selected-products-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product Name</th>
+              <th>Quantity</th>
+              <th>Total Price</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(product, index) in selectedProducts"
+              :key="product.product_id"
+            >
+              <td>{{ (currentPage - 1) * productsPerPage + index + 1 }}</td>
+              <td>{{ product.product_name }}</td>
+              <td>
+                <input
+                  type="number"
+                  v-model.number="product.quantity"
+                  @input="updateTotalPrice"
+                  min="1"
+                />
+              </td>
+              <td>{{ product.quantity * product.price }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-remove"
+                  @click="removeProduct(index)"
+                >
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- Total Harga Keseluruhan -->
+        <div class="mb-3">
+          <div for="total-price" class="form-label">
+            Grand Total:
+            <p class="form-price">
+              {{
+                grandTotal.toLocaleString("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+              }}
+            </p>
           </div>
         </div>
+        <div class="button-container">
+          <button @click.prevent="submitOrder" class="btn btn-success">
+            Submit
+          </button>
+        </div>
       </div>
+    </div>
   </div>
 </template>
 
@@ -222,8 +243,8 @@ export default {
 
     onMounted(() => {
       if (authStore.token) {
-      productStore.fetchProducts();
-      products.value = productStore.products;
+        productStore.fetchProducts();
+        products.value = productStore.products;
       } else {
         console.error("Orders is not authenticated");
       }
@@ -265,7 +286,7 @@ export default {
     };
 
     const submitOrder = async () => {
-      console.log(selectedProducts.value)
+      console.log(selectedProducts.value);
       if (selectedProducts.value.length === 0) {
         alert("Please select at least one product.");
         return;
@@ -280,16 +301,15 @@ export default {
       alert("Order placed successfully!");
       selectedProducts.value = [];
 
-      console.log(orders)
-      for(let order of orders){
-          // await productStore.fetchProducts();
+      console.log(orders);
+      for (let order of orders) {
+        // await productStore.fetchProducts();
         await orderStore.addOrder(order);
       }
       await productStore.fetchProducts(); // Fetch latest users
     };
 
     const updateTotalPrice = () => {};
-
 
     // onMounted(fetchProducts);
 
@@ -302,8 +322,16 @@ export default {
       removeProduct,
       submitOrder,
       updateTotalPrice,
+    };
+  },
+
+  data() {
+    return {
+      showForm: false,
+      selectedproduct: null,
+      isEdit: false,
       currentPage: 1,
-      productsPerPage: 10,
+      productsPerPage: 5,
       searchQuery: "",
       sortKey: "",
       sortDirection: "asc",
@@ -357,7 +385,9 @@ export default {
 
   methods: {
     getValueByKey(obj, key) {
-      return key.split(".").reduce((o, k) => (o ? o[k] : undefined), obj);
+      return key
+        .split(/[\[\]\.]+/)
+        .reduce((o, k) => (o ? o[k] : undefined), obj);
     },
 
     sortTable(key) {
@@ -379,10 +409,36 @@ export default {
       }
     },
   },
+
+  unmounted() {
+    eventBus.on("search", this.handleSearch);
+  },
+
+  beforeUnmount() {
+    eventBus.off("search", this.handleSearch);
+  },
 };
 </script>
 
 <style scoped>
+.product {
+  padding: 20px;
+}
+
+.product-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #736efe;
+}
+
+.product-list {
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
 .order {
   padding: 20px;
 }
@@ -423,11 +479,6 @@ h2 {
   margin-top: 40px;
 }
 
-.search-input::placeholder {
-  font-size: 14px;
-  color: #cbcbcb;
-}
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -453,18 +504,21 @@ th {
 tr:nth-child(even) {
   background-color: #f2f2f2;
 }
+
 .mb-3 {
   margin-bottom: 1rem;
 }
 
-.btn-select,
-.btn-remove {
-  background-color: #736efe;
+.btn-select {
+  color: #77a4ff;
+  background-color: #dfeaff;
+  border-radius: 10px;
   border: none;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
+  font-size: 14px;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-success {
@@ -477,20 +531,41 @@ tr:nth-child(even) {
 }
 
 .btn-select:hover {
-  background-color: #615dd7;
+  background-color: #547ccb;
 }
 
 .btn-remove {
-  background-color: #fe6e70;
+  color: #fe6e70;
+  background-color: #ffdfdf;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-remove:hover {
   background-color: #bb3232;
 }
 
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #dadada;
+}
+
 .search {
   flex: 1;
   width: 100%;
+}
+
+.search-input::placeholder {
+  font-size: 14px;
+  color: #cbcbcb;
 }
 
 .search-input {
@@ -543,6 +618,11 @@ tr:nth-child(even) {
   font-size: 14px;
   font-weight: 600px;
   border-radius: 6px;
+}
+
+.page-link:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 .items-per-page {

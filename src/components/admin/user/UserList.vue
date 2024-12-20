@@ -150,7 +150,6 @@ export default {
 .user {
   padding: 20px;
 }
-
 .user-list {
   padding: 24px;
   background-color: #fff;
@@ -198,20 +197,26 @@ table {
 
 th,
 td {
+  border: 1px solid #ddd;
   padding: 12px 15px;
   text-align: center;
   vertical-align: middle;
-  font-size: 14px;
-  border-top: 0.5px solid #cbcbcb;
-  border-bottom: 0.5px solid #cbcbcb;
 }
 
 th {
   background-color: #736efe;
   color: white;
-  font-size: 14px;
-  font-weight: 600;
+  text-transform: uppercase;
 }
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #ddd;
+}
+
 button {
   padding: 6px 12px;
   border: none;
@@ -243,6 +248,16 @@ button {
   th,
   td {
     padding: 8px 10px;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-buttons button {
+    margin: 5px 0;
   }
 }
 </style>

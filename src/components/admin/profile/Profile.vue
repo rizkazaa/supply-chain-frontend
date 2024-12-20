@@ -63,7 +63,13 @@
           </div>
         </div>
         <div class="button-container">
-          <button type="submit" class="btn-success" @click.prevent="updateProfile" >Save Changes</button>
+          <button
+            type="submit"
+            class="btn-success"
+            @click.prevent="updateProfile"
+          >
+            Save Changes
+          </button>
         </div>
       </form>
     </div>
@@ -89,27 +95,27 @@ export default {
       }
     });
 
-      return {
+    return {
       profiles,
       profileStore,
     };
   },
 
   computed: {
-    form(){
+    form() {
       return {
         username: this.profiles.username,
         email: this.profiles.email,
-        password: '',
+        password: "",
         role: this.profiles.role,
         category: this.profiles.category,
-      }
-    }
+      };
+    },
   },
 
   methods: {
     async updateProfile() {
-      console.log(this.form)
+      console.log(this.form);
       await this.profileStore.updateProfile(this.form);
       await this.profileStore.fetchProfile(); // Fetch latest user profile
       alert("Profile updated successfully!");

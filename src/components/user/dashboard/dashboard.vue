@@ -24,21 +24,20 @@
         </div>
       </div>
       <div class="card">
-        <h3>Pending Orders</h3>
+        <h3>Reject Orders</h3>
         <div class="card-content">
-          <p>{{ pendingOrders }}</p>
-          <i class="fa-solid fa-hourglass-half icon pending-icon"></i>
+          <p>{{ rejectOrders }}</p>
+          <i class="fa-solid fa-file-circle-exclamation icon reject-icon"></i>
         </div>
       </div>
     </div>
-
-    <div class="chart-date-container">
-      <TransactionList />
+    <TransactionList />
+    <!--<div class="chart-date-container">
       <div class="datepicker-wrapper">
         <h3>Calendar</h3>
         <DatePicker />
       </div>
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -48,6 +47,7 @@ import DatePicker from "@/components/admin/dashboard/Calendar.vue";
 import TransactionList from "@/components/user/transaction/TransactionList.vue";
 import { computed, onMounted } from "vue";
 import { useProductStore } from "@/store/itemStore";
+import { useOrderStore } from "@/store/orderStore";
 
 export default {
   components: {
@@ -58,25 +58,39 @@ export default {
 
   setup() {
     const productStore = useProductStore();
+    const orderStore = useOrderStore();
 
-    // Ambil data produk dari store
     const products = computed(() => productStore.products);
+    const orders = computed(() => orderStore.orders);
 
-    // Hitung total stok
     const totalStock = computed(() =>
-      products.value.reduce((sum, product) => {
-        const quantity = product.Quantity?.[0]?.quantity_of_product || 0;
-        return sum + quantity;
+      orders.value.reduce((sum, order) => {
+        return order.status === "DONE" ? sum + (order.quantity || 0) : sum;
       }, 0)
     );
 
+    const totalOrders = computed(() => orders.value.length);
+
+    const completedOrders = computed(
+      () => orders.value.filter((order) => order.status === "DONE").length
+    );
+
+    const rejectOrders = computed(
+      () => orders.value.filter((order) => order.status === "REJECT").length
+    );
+
     onMounted(() => {
-      productStore.fetchProductsByUserId(); // Pastikan data produk sudah di-fetch
+      productStore.fetchProductsByUserId();
+      orderStore.fetchOrdersByUserId(); // Pastikan pesanan telah di-fetch
     });
 
     return {
       products,
+      orders,
       totalStock,
+      totalOrders,
+      completedOrders,
+      rejectOrders,
     };
   },
 };
@@ -162,7 +176,7 @@ p {
   background-color: #d5ffe2;
 }
 
-.pending-icon {
+.reject-icon {
   color: #fe6e70;
   background-color: #ffdfdf;
 }

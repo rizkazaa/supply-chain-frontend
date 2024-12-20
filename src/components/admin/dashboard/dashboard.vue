@@ -53,6 +53,7 @@ import DatePicker from "@/components/admin/dashboard/Calendar.vue";
 import TransactionList from "@/components/admin/transaction/TransactionList.vue";
 import { computed, onMounted } from "vue";
 import { useProductStore } from "@/store/itemStore";
+import { useOrderStore } from "@/store/orderStore";
 
 export default {
   components: {
@@ -63,11 +64,11 @@ export default {
 
   setup() {
     const productStore = useProductStore();
+    const orderStore = useOrderStore();
 
-    // Ambil data produk dari store
     const products = computed(() => productStore.products);
+    const orders = computed(() => orderStore.orders);
 
-    // Hitung total stok
     const totalStock = computed(() =>
       products.value.reduce((sum, product) => {
         const quantity = product.Quantity?.[0]?.quantity_of_product || 0;
@@ -75,13 +76,28 @@ export default {
       }, 0)
     );
 
+    const totalOrders = computed(() => orders.value.length);
+
+    const completedOrders = computed(
+      () => orders.value.filter((order) => order.status === "DONE").length
+    );
+
+    const pendingOrders = computed(
+      () => orders.value.filter((order) => order.status === "PENDING").length
+    );
+
     onMounted(() => {
-      productStore.fetchProductsByUserId(); // Pastikan data produk sudah di-fetch
+      productStore.fetchProductsByUserId();
+      orderStore.fetchOrdersByUserId(); // Pastikan pesanan telah di-fetch
     });
 
     return {
       products,
+      orders,
       totalStock,
+      totalOrders,
+      completedOrders,
+      pendingOrders,
     };
   },
 };
@@ -168,8 +184,8 @@ p {
 }
 
 .pending-icon {
-  color: #fe6e70;
-  background-color: #ffdfdf;
+  color: #f79c42;
+  background-color: #ffddba;
 }
 
 .chart-date-container {

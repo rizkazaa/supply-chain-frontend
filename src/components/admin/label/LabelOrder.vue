@@ -53,10 +53,10 @@ export default {
     },
   },
   computed: {
-      qrCode(){
-        return this.label.qr_code.replace("\n", "<br>")
-      }
-  }
+    qrCode() {
+      return this.label.qr_code.replace();
+    },
+  },
 };
 </script>
 

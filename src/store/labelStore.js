@@ -7,9 +7,20 @@ export const useLabelStore = defineStore("labelStore", {
   }),
   actions: {
     // Fetch labels berdasarkan ID user (misalnya, jika labels terkait dengan user tertentu)
-    async fetchLabelsByUserId() {
+    async fetchLabels() {
       try {
         const response = await apiClient.get(`/labels`);
+        this.labels = response.data;
+      } catch (error) {
+        console.error(
+          "Failed to fetch labels by user ID:",
+          error.response?.data || error.message
+        );
+      }
+    },
+    async fetchLabelsByUserId() {
+      try {
+        const response = await apiClient.get(`/labels/user`);
         this.labels = response.data;
       } catch (error) {
         console.error(

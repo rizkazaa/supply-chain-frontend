@@ -7,38 +7,124 @@
         <div class="search">
           <input
             type="search"
-            class="form-control rounded"
             placeholder="Search"
             aria-label="Search"
             aria-describedby="search-addon"
+            v-model="searchQuery"
+            class="search-input"
           />
         </div>
       </div>
       <table>
         <thead>
           <tr>
+            <th>#</th>
             <th>Product ID</th>
-            <th>Stakeholder</th>
-            <th>Product Name</th>
-            <th>Quantity</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Status</th>
+            <th @click="sortTable('User.username')">
+              Stakeholder
+              <span
+                v-if="sortKey === 'User.username'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('Master_Data.product_name')">
+              Product Name
+              <span
+                v-if="sortKey === 'Master_Data.product_name'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('Order.quantity')">
+              Quantity
+              <span
+                v-if="sortKey === 'Order.quantity'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('Order.total')">
+              Amount
+              <span
+                v-if="sortKey === 'Order.total'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('created_at')">
+              Date
+              <span
+                v-if="sortKey === 'created_at'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('Order.status')">
+              Status
+              <span
+                v-if="sortKey === 'Order.status'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
             <th class="action-column">Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="label in paginatedLabels" :key="label.label_id">
+          <tr v-for="(label, index) in paginatedLabels" :key="label.label_id">
+            <td>{{ (currentPage - 1) * labelsPerPage + index + 1 }}</td>
             <td>{{ label.Master_Data?.product_id }}</td>
             <td>{{ label.User?.username }}</td>
             <td>{{ label.Master_Data?.product_name }}</td>
             <td>{{ label.Order?.quantity }}</td>
-            <td>{{ label.Order?.total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
-            <td>{{ label.created_at.split('T')[0] }}</td>
-            <td>{{ label.Order?.status }}</td>
+            <td>
+              {{
+                label.Order?.total.toLocaleString("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+              }}
+            </td>
+            <td>{{ label.created_at.split("T")[0] }}</td>
+            <td>
+              <span
+                :class="{
+                  'done-status': label.Order?.status === 'DONE',
+                  'on-process-status': label.Order?.status === 'ON_PROCESS',
+                }"
+                >{{ label.Order?.status }}</span
+              >
+            </td>
             <td>
               <button class="verif-btn" @click="openModal(label)">
-                <i class="fa-solid fa-print"></i>
+                <i class="fa-solid fa-print icon"></i>
               </button>
             </td>
           </tr>
@@ -47,7 +133,18 @@
 
       <nav aria-label="page-navigation-table">
         <ul class="pagination">
-          <li class="page-item" :class="{ disabled: currentPage === 1 }">
+          <div class="items-per-page">
+            <label for="itemsPerPage">Items per page: </label>
+            <select v-model="labelsPerPage" id="itemsPerPage">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+
+          <li class="page-label" :class="{ disabled: currentPage === 1 }">
             <a
               class="page-link"
               href="#"
@@ -57,19 +154,19 @@
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
+          <!--<li
+              v-for="page in totalPages"
+              :key="page"
+              class="page-label"
+              :class="{ active: currentPage === page }"
+            >
+              <a class="page-link" href="#" @click.prevent="changePage(page)">
+                {{ page }}
+              </a>
+            </li>-->
           <li
-            v-for="page in quantityPages"
-            :key="page"
-            class="page-item"
-            :class="{ active: currentPage === page }"
-          >
-            <a class="page-link" href="#" @click.prevent="changePage(page)">
-              {{ page }}
-            </a>
-          </li>
-          <li
-            class="page-item"
-            :class="{ disabled: currentPage === quantityPages }"
+            class="page-label"
+            :class="{ disabled: currentPage === totalPages }"
           >
             <a
               class="page-link"
@@ -86,9 +183,9 @@
 
     <Modal :visible="isModalVisible" @close="closeModal">
       <LabelOrder :label="selectedLabel" :isCompact="true" />
-      <div class="button-container">
+      <!--<div class="button-container">
         <button type="submit" class="btn-success">Print</button>
-      </div>
+      </div>-->
     </Modal>
   </div>
 </template>
@@ -131,19 +228,61 @@ export default {
       selectedLabel: null,
       isModalVisible: false,
       currentPage: 1,
-      labelPerPage: 5,
+      labelsPerPage: 5,
+      searchQuery: "",
+      sortKey: "",
+      sortDirection: "asc",
     };
   },
 
   computed: {
-    quantityPages() {
-      return Math.ceil(this.labels.length / this.labelPerPage);
+    totalPages() {
+      return Math.ceil(
+        this.labels.filter((label) =>
+          label.Master_Data?.product_name
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
+        ).length / this.labelsPerPage
+      );
     },
 
     paginatedLabels() {
-      const start = (this.currentPage - 1) * this.labelPerPage;
-      const end = start + this.labelPerPage;
-      return this.labels.slice(start, end);
+      let filteredLabels = this.labels.filter((label) =>
+        label.Master_Data?.product_name
+          .toLowerCase()
+          .includes(this.searchQuery.toLowerCase())
+      );
+
+      if (this.sortKey) {
+        filteredLabels.sort((a, b) => {
+          let aValue = this.getValueByKey(a, this.sortKey) || ""; // Pastikan nilai tidak undefined
+          let bValue = this.getValueByKey(b, this.sortKey) || ""; // Pastikan nilai tidak undefined
+
+          if (typeof aValue === "string") aValue = aValue.toLowerCase();
+          if (typeof bValue === "string") bValue = bValue.toLowerCase();
+
+          if (this.sortDirection === "asc") {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        });
+      }
+
+      return filteredLabels.slice(
+        (this.currentPage - 1) * this.labelsPerPage,
+        this.currentPage * this.labelsPerPage
+      );
+    },
+
+    totalPages() {
+      return Math.ceil(
+        this.labels.filter((label) =>
+          label.Master_Data?.product_name
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
+        ).length / this.labelsPerPage
+      );
     },
   },
 
@@ -152,12 +291,29 @@ export default {
       this.selectedLabel = { ...label };
       this.isModalVisible = true;
     },
+
     closeModal() {
       this.isModalVisible = false;
       this.selectedLabel = null;
     },
+
+    getValueByKey(obj, key) {
+      return key
+        .split(/[\[\]\.]+/)
+        .reduce((o, k) => (o ? o[k] : undefined), obj);
+    },
+
+    sortTable(key) {
+      if (this.sortKey === key) {
+        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+      } else {
+        this.sortKey = key;
+        this.sortDirection = "asc";
+      }
+    },
+
     changePage(page) {
-      if (page >= 1 && page <= this.quantityPages) {
+      if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
       }
     },
@@ -178,7 +334,7 @@ export default {
 }
 
 .label-container,
-.label-order {
+.label-label {
   padding: 40px;
   background-color: #fff;
   border-radius: 8px;
@@ -203,20 +359,40 @@ h2 {
   color: #736efe;
   font-size: 24px;
   font-weight: 600;
+  margin-right: 350px;
 }
 
 .search {
-  width: 50%;
+  flex: 1;
+  width: 100%;
 }
 
-.search input::placeholder {
+.search-input::placeholder {
   font-size: 14px;
   color: #cbcbcb;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.sort-icon {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-size: 10px;
+}
+
+.sort-icon:hover {
+  color: #cbcbcb;
 }
 
 th,
@@ -269,6 +445,11 @@ button {
   background-color: #615dd7;
   border-color: #615dd7;
 }
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .verif-btn {
   color: #77a4ff;
@@ -277,7 +458,6 @@ button {
   font-size: 14px;
   width: 35px;
   height: 35px;
-  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -286,12 +466,36 @@ button {
   background-color: #6389d6;
 }
 
+.done-status {
+  color: #63d18b;
+  background-color: #d5ffe2;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.on-process-status {
+  color: #77a4ff;
+  background-color: #dfeaff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .pagination {
   justify-content: flex-end;
   margin-top: 20px;
 }
 
-.page-item {
+.page-label {
   margin-left: 5px;
 }
 
@@ -305,18 +509,54 @@ button {
   border-radius: 6px;
 }
 
+.page-link:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.items-per-page {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.items-per-page label {
+  font-size: 14px;
+}
+
+.items-per-page select {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #736efe;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.items-per-page select:focus {
+  border-color: #736efe;
+  outline: none;
+}
+
+.items-per-page select option {
+  padding: 10px;
+  font-size: 14px;
+}
+
 .page-link:hover {
   background-color: #615dd7;
   color: white;
 }
 
-.page-item.active .page-link {
+.page-label.active .page-link {
   background-color: #736efe;
   color: white;
   border: 1px solid #736efe;
 }
 
-.page-item.disabled .page-link {
+.page-label.disabled .page-link {
   color: #cbcbcb;
   border: 1px solid #cbcbcb;
 }

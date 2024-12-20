@@ -7,15 +7,15 @@
         <div class="search">
           <input
             type="search"
-            class="form-control rounded"
             placeholder="Search"
             aria-label="Search"
             aria-describedby="search-addon"
             v-model="searchQuery"
+            class="search-input"
           />
         </div>
         <button class="add-btn" @click="showAddForm">
-          <i class="fa-solid fa-plus icon"></i>Add Product
+          <i class="fa-solid fa-plus icon-add-product"></i>Add Product
         </button>
       </div>
 
@@ -72,17 +72,26 @@
               <td>{{ (currentPage - 1) * productsPerPage + index + 1 }}</td>
               <td>{{ product.product_id }}</td>
               <td>{{ product.product_name }}</td>
-              <td>{{ product.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
+              <td>
+                {{
+                  product.price.toLocaleString("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })
+                }}
+              </td>
               <td>{{ product.Quantity[0]?.quantity_of_product }}</td>
-              <td class="d-flex justify-content-center">
+              <td>
                 <button class="edit-btn" @click="editProduct(product)">
-                  <i class="fa-solid fa-pen-to-square"></i>
+                  <i class="fa-solid fa-pen-to-square icon"></i>
                 </button>
                 <button
                   class="delete-btn"
                   @click="deleteProduct(product.product_id)"
                 >
-                  <i class="fa-solid fa-trash"></i>
+                  <i class="fa-solid fa-trash icon"></i>
                 </button>
               </td>
             </tr>
@@ -96,7 +105,7 @@
               <select v-model="productsPerPage" id="itemsPerPage">
                 <option value="5">5</option>
                 <option value="10">10</option>
-                <option value="10">25</option>
+                <option value="25">25</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
               </select>
@@ -369,9 +378,17 @@ h2 {
   margin-right: 10px;
 }
 
-.search input::placeholder {
+.search-input::placeholder {
   font-size: 14px;
   color: #cbcbcb;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .add-btn {
@@ -383,6 +400,7 @@ h2 {
   border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
+  margin-bottom: 10px;
 }
 
 .add-btn:hover {
@@ -441,6 +459,12 @@ button {
 }
 
 .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-add-product {
   margin-right: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -458,7 +482,6 @@ button {
   font-size: 14px;
   width: 35px;
   height: 35px;
-  display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 4px;
@@ -471,7 +494,6 @@ button {
   font-size: 14px;
   width: 35px;
   height: 35px;
-  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -486,13 +508,18 @@ button {
 }
 
 .page-link {
-  color: #736efe; /* Warna teks ungu untuk semua halaman */
-  background-color: transparent; /* Menghilangkan background default */
-  border: 1px solid #736efe; /* Border ungu untuk halaman */
+  color: #736efe;
+  background-color: transparent;
+  border: 1px solid #736efe;
   padding: 6px 12px;
   font-size: 14px;
   font-weight: 600px;
   border-radius: 6px;
+}
+
+.page-link:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 .items-per-page {

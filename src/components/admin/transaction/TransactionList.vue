@@ -7,10 +7,11 @@
         <div class="search">
           <input
             type="search"
-            class="form-control rounded"
             placeholder="Search"
             aria-label="Search"
             aria-describedby="search-addon"
+            v-model="searchQuery"
+            class="search-input"
           />
         </div>
       </div>
@@ -19,32 +20,117 @@
         <table>
           <thead>
             <tr>
+              <th>#</th>
               <th>Order ID</th>
-              <th>Stakeholder</th>
-              <th>Product Name</th>
-              <th>Quantity</th>
-              <th>Amount</th>
-              <th>Date</th>
-              <th>Status</th>
+              <th @click="sortTable('User.username')">
+                Stakeholder
+                <span
+                  v-if="sortKey === 'User.username'"
+                  :class="{
+                    'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                    'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                    'fa-solid fa-sort sort-icon': sortDirection === '',
+                  }"
+                ></span>
+                <span v-else class="fa-solid fa-sort sort-icon"></span>
+              </th>
+              <th @click="sortTable('Master_Data.product_name')">
+                Product Name
+                <span
+                  v-if="sortKey === 'Master_Data.product_name'"
+                  :class="{
+                    'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                    'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                    'fa-solid fa-sort sort-icon': sortDirection === '',
+                  }"
+                ></span>
+                <span v-else class="fa-solid fa-sort sort-icon"></span>
+              </th>
+              <th @click="sortTable('quantity')">
+                Quantity
+                <span
+                  v-if="sortKey === 'quantity'"
+                  :class="{
+                    'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                    'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                    'fa-solid fa-sort sort-icon': sortDirection === '',
+                  }"
+                ></span>
+                <span v-else class="fa-solid fa-sort sort-icon"></span>
+              </th>
+              <th @click="sortTable('total')">
+                Amount
+                <span
+                  v-if="sortKey === 'total'"
+                  :class="{
+                    'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                    'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                    'fa-solid fa-sort sort-icon': sortDirection === '',
+                  }"
+                ></span>
+                <span v-else class="fa-solid fa-sort sort-icon"></span>
+              </th>
+              <th @click="sortTable('created_at')">
+                Date
+                <span
+                  v-if="sortKey === 'created_at'"
+                  :class="{
+                    'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                    'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                    'fa-solid fa-sort sort-icon': sortDirection === '',
+                  }"
+                ></span>
+                <span v-else class="fa-solid fa-sort sort-icon"></span>
+              </th>
+              <th @click="sortTable('status')">
+                Status
+                <span
+                  v-if="sortKey === 'status'"
+                  :class="{
+                    'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                    'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                    'fa-solid fa-sort sort-icon': sortDirection === '',
+                  }"
+                ></span>
+                <span v-else class="fa-solid fa-sort sort-icon"></span>
+              </th>
               <th class="action-column">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="order in paginatedOrders" :key="order.order_id">
+            <tr v-for="(order, index) in paginatedOrders" :key="order.order_id">
+              <td>{{ (currentPage - 1) * ordersPerPage + index + 1 }}</td>
               <td>{{ order.order_id }}</td>
               <td>{{ order.User?.username }}</td>
               <td>{{ order.Master_Data?.product_name }}</td>
               <td>{{ order.quantity }}</td>
-              <td>{{ order.total?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}</td>
-              <td>{{ order.created_at?.split('T')[0] }}</td>
-              <td>{{ order.status }}</td>
+              <td>
+                {{
+                  order.total?.toLocaleString("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })
+                }}
+              </td>
+              <td>{{ order.created_at?.split("T")[0] }}</td>
+              <td>
+                <span
+                  :class="{
+                    'rejected-status': order.status === 'REJECT',
+                    'done-status': order.status === 'DONE',
+                    'on-process-status': order.status === 'ON_PROCESS',
+                    'pending-status': order.status === 'PENDING',
+                  }"
+                >
+                  {{ order.status }}
+                </span>
+              </td>
               <td class="action-buttons">
                 <button class="verif-btn" @click="openModal(order)">
-                  <i class="fa-solid fa-pen-to-square"></i>
+                  <i class="fa-solid fa-pen-to-square icon"></i>
                 </button>
-                <!-- <button class="delete-btn" @click="deleteOrder(order.order_id)">
-                  <i class="fa-solid fa-trash"></i>
-                </button> -->
               </td>
             </tr>
           </tbody>
@@ -52,7 +138,18 @@
 
         <nav aria-label="page-navigation-table">
           <ul class="pagination">
-            <li class="page-item" :class="{ disabled: currentPage === 1 }">
+            <div class="items-per-page">
+              <label for="itemsPerPage">Items per page: </label>
+              <select v-model="ordersPerPage" id="itemsPerPage">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+
+            <li class="page-order" :class="{ disabled: currentPage === 1 }">
               <a
                 class="page-link"
                 href="#"
@@ -62,18 +159,18 @@
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            <li
+            <!--<li
               v-for="page in totalPages"
               :key="page"
-              class="page-item"
+              class="page-order"
               :class="{ active: currentPage === page }"
             >
               <a class="page-link" href="#" @click.prevent="changePage(page)">
                 {{ page }}
               </a>
-            </li>
+            </li>-->
             <li
-              class="page-item"
+              class="page-order"
               :class="{ disabled: currentPage === totalPages }"
             >
               <a
@@ -96,10 +193,10 @@
         <div class="status-dropdown">
           <select v-model="form.status" required>
             <option selected>{{ form.status }}</option>
-            <option value="PENDING">Pending</option>
-            <option value="ON_PROCESS">On Process</option>
-            <option value="DONE">Done</option>
-            <option value="REJECT">Reject</option>
+            <option value="PENDING">PENDING</option>
+            <!--<option value="ON_PROCESS">On Process</option>-->
+            <option value="DONE">DONE</option>
+            <option value="REJECT">REJECT</option>
           </select>
         </div>
         <div class="button-container">
@@ -115,7 +212,7 @@ import Modal from "@/components/Modal.vue"; // Impor modal baru
 import { computed, onMounted } from "vue";
 import { useAuthStore } from "@/store/authStore";
 import eventBus from "@/utils/EventBus";
-import { useOrderStore } from "@/store/orderStore"
+import { useOrderStore } from "@/store/orderStore";
 
 export default {
   components: {
@@ -148,20 +245,52 @@ export default {
         order_id: "",
         status: "",
       },
+      searchQuery: "",
       currentPage: 1,
       ordersPerPage: 5,
+      sortKey: "",
+      sortDirection: "asc",
     };
   },
 
   computed: {
-    totalPages() {
-      return Math.ceil(this.orders.length / this.ordersPerPage);
+    paginatedOrders() {
+      let filteredOrders = this.orders.filter((order) =>
+        order.Master_Data?.product_name
+          .toLowerCase()
+          .includes(this.searchQuery.toLowerCase())
+      );
+
+      if (this.sortKey) {
+        filteredOrders.sort((a, b) => {
+          let aValue = this.getValueByKey(a, this.sortKey) || ""; // Pastikan nilai tidak undefined
+          let bValue = this.getValueByKey(b, this.sortKey) || ""; // Pastikan nilai tidak undefined
+
+          if (typeof aValue === "string") aValue = aValue.toLowerCase();
+          if (typeof bValue === "string") bValue = bValue.toLowerCase();
+
+          if (this.sortDirection === "asc") {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        });
+      }
+
+      return filteredOrders.slice(
+        (this.currentPage - 1) * this.ordersPerPage,
+        this.currentPage * this.ordersPerPage
+      );
     },
 
-    paginatedOrders() {
-      const start = (this.currentPage - 1) * this.ordersPerPage;
-      const end = start + this.ordersPerPage;
-      return this.orders.slice(start, end);
+    totalPages() {
+      return Math.ceil(
+        this.orders.filter((order) =>
+          order.Master_Data?.product_name
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
+        ).length / this.ordersPerPage
+      );
     },
   },
 
@@ -180,18 +309,33 @@ export default {
     },
 
     async updateStatus() {
-      if(this.form.status == 'REJECT'){
-        console.log(this.form)
-        await this.orderStore.rejectOrder(this.form)
-      }else {
-        await this.orderStore.updateOrder(this.form)
+      if (this.form.status == "REJECT") {
+        console.log(this.form);
+        await this.orderStore.rejectOrder(this.form);
+      } else {
+        await this.orderStore.updateOrder(this.form);
       }
-      await this.orderStore.fetchOrdersByUserId()
+      await this.orderStore.fetchOrdersByUserId();
       this.closeModal();
     },
 
     deleteOrder(order_id) {
       this.orders = this.orders.filter((order) => order.order_id !== order_id);
+    },
+
+    getValueByKey(obj, key) {
+      return key
+        .split(/[\[\]\.]+/)
+        .reduce((o, k) => (o ? o[k] : undefined), obj);
+    },
+
+    sortTable(key) {
+      if (this.sortKey === key) {
+        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+      } else {
+        this.sortKey = key;
+        this.sortDirection = "asc";
+      }
     },
 
     changePage(page) {
@@ -219,7 +363,7 @@ h3 {
   color: #736efe;
   font-weight: bold;
   margin: 20px;
-  font-size: 32px;
+  font-size: 24px;
 }
 
 .order-title {
@@ -247,6 +391,7 @@ h2 {
   color: #736efe;
   font-size: 24px;
   font-weight: 600;
+  margin-right: 350px;
 }
 
 .table-responsive {
@@ -283,6 +428,16 @@ tr:hover {
   background-color: #cbcbcb;
 }
 
+.sort-icon {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-size: 10px;
+}
+
+.sort-icon:hover {
+  color: #cbcbcb;
+}
+
 button {
   padding: 6px 12px;
   border: none;
@@ -315,18 +470,10 @@ button {
   background-color: #bca052;
 }
 
-.delete-btn:hover {
-  background-color: #bb3232;
-}
-
 .icon {
-  margin-right: 8px;
-}
-
-.action-buttons {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .verif-btn {
@@ -336,19 +483,53 @@ button {
   font-size: 14px;
   width: 35px;
   height: 35px;
+  align-items: center;
+  justify-content: center;
+}
+
+.rejected-status {
+  color: #fe6e70;
+  background-color: #ffdfdf;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 4px;
 }
 
-.delete-btn {
-  color: #fe6e70;
-  background-color: #ffdfdf;
+.on-process-status {
+  color: #77a4ff;
+  background-color: #dfeaff;
+  font-size: 12px;
+  font-weight: bold;
   border-radius: 10px;
-  font-size: 14px;
-  width: 35px;
-  height: 35px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.done-status {
+  color: #63d18b;
+  background-color: #d5ffe2;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pending-status {
+  color: #f79c42;
+  background-color: #ffddba;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -386,7 +567,7 @@ button {
   margin-top: 20px;
 }
 
-.page-item {
+.page-order {
   margin-left: 5px;
 }
 
@@ -400,29 +581,74 @@ button {
   border-radius: 6px;
 }
 
+.page-link:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.items-per-page {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.items-per-page label {
+  font-size: 14px;
+}
+
+.items-per-page select {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #736efe;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.items-per-page select:focus {
+  border-color: #736efe;
+  outline: none;
+}
+
+.items-per-page select option {
+  padding: 10px;
+  font-size: 14px;
+}
+
 .page-link:hover {
   background-color: #615dd7;
   color: white;
 }
 
-.page-item.active .page-link {
+.page-order.active .page-link {
   background-color: #736efe;
   color: white;
   border: 1px solid #736efe;
 }
 
-.page-item.disabled .page-link {
+.page-order.disabled .page-link {
   color: #cbcbcb;
   border: 1px solid #cbcbcb;
 }
 
 .search {
-  width: 50%;
+  flex: 1;
+  width: 100%;
 }
 
-.search input::placeholder {
+.search-input::placeholder {
   font-size: 14px;
   color: #cbcbcb;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 @media (max-width: 600px) {
