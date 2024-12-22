@@ -13,6 +13,7 @@
               <th scope="col">Username</th>
               <th scope="col">Email</th>
               <th scope="col">Role</th>
+              <th scope="col">Category</th>
               <th scope="col">Actions</th>
             </tr>
           </thead>
@@ -21,6 +22,7 @@
               <td>{{ user.username }}</td>
               <td>{{ user.email }}</td>
               <td>{{ user.role }}</td>
+              <td>{{ user.category ? user.category : '-' }}</td>
               <td>
                 <button class="edit-btn" @click="editUser(user)" title="Edit">
                   <i class="fa-solid fa-pen-to-square icon"></i>
@@ -134,9 +136,9 @@ export default {
       this.showForm = false;
     },
 
-    async handleDeleteUser() {
-      await this.userStore.deleteUser();
-      await this.userStore.fetchUsers(); // Fetch latest users
+    async handleDeleteUser(user) {
+      await this.userStore.deleteUser(user);
+      await this.userStore.fetchUsers(user); // Fetch latest users
     },
 
     handleSearch(query) {
