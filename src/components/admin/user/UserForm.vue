@@ -2,15 +2,13 @@
   <div>
     <h3>{{ isEdit ? "Edit User" : "Add User" }}</h3>
     <form @submit.prevent="submitForm" class="user-form">
-
-        <input
-          type="text"
-          v-model="form.user_id"
-          id="user_id"
-          class="form-control"
-          hidden
-        />
-
+      <input
+        type="text"
+        v-model="form.user_id"
+        id="user_id"
+        class="form-control"
+        hidden
+      />
 
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
@@ -76,22 +74,22 @@
           v-model="form.category"
           id="category"
           class="form-control"
-          :disabled="form.role == 'STAKEHOLDER'" 
+          :disabled="form.role == 'STAKEHOLDER'"
           required
         />
       </div>
 
       <div v-if="form.error" class="alert alert-danger">{{ form.error }}</div>
-
-      <button type="submit" class="btn btn-success w-100">
-        {{ isEdit ? "Save" : "Save" }}
-      </button>
+      <div class="button-container">
+        <button type="submit" class="btn btn-success">
+          {{ isEdit ? "Save" : "Save" }}
+        </button>
+      </div>
     </form>
   </div>
 </template>
 
 <script>
-
 export default {
   props: {
     user: {
@@ -131,7 +129,7 @@ export default {
             username: newUser.username,
             email: newUser.email,
             role: newUser.role,
-            category: newUser.category ? newUser.category : ''
+            category: newUser.category ? newUser.category : "",
           };
         } else {
           this.resetForm();
@@ -172,7 +170,7 @@ export default {
           email: this.form.email,
           password: this.form.password,
           role: this.form.role,
-          category: this.form.category ? this.form.category : ''
+          category: this.form.category ? this.form.category : "",
         };
 
         console.log("Sending data to server:", payload);
@@ -193,8 +191,7 @@ form {
   background-color: #fff;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
-  margin: 20px;
+  margin: 10px;
 }
 
 .mb-3 {
@@ -222,7 +219,6 @@ form {
 .button-container {
   display: flex;
   justify-content: center;
-  gap: 10px;
   margin: 20px 20px;
 }
 
@@ -230,7 +226,7 @@ form {
   background-color: #736efe;
   border-color: #736efe;
   color: white;
-  width: 80px; /* Ukuran tombol */
+  width: 120px;
   height: 40px;
   font-size: 14px;
 }
@@ -244,7 +240,7 @@ form {
   background-color: #fe6e70;
   border-color: #fe6e70;
   color: white;
-  width: 120px; /* Ukuran tombol */
+  width: 120px;
   height: 40px;
   font-size: 14px;
 }
