@@ -3,7 +3,7 @@
     <h2>Dashboard</h2>
     <div class="card-container">
       <div class="card">
-        <h3>Product Stock</h3>
+        <h3>Orders Product Stock</h3>
         <div class="card-content">
           <p>{{ totalStock }}</p>
           <i class="fa-solid fa-box-open icon product-icon"></i>
