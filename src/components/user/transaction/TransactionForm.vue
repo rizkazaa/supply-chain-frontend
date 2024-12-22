@@ -94,6 +94,7 @@ export default {
         alert("Mohon lengkapi data produk dan quantity!");
         return;
       }
+      this.form.order_id = this.order.order_id
       this.$emit("submit-form", {
         ...this.form,
         total_price: this.formPrice,

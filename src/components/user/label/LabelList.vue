@@ -1,129 +1,191 @@
 <template>
   <div class="label">
     <!--<h2 class="label-title">Label</h2>-->
-    <div class="label-list">
+    <div class="label-container">
       <div class="header">
         <h2>Label List</h2>
         <div class="search">
           <input
             type="search"
-            class="form-control rounded"
             placeholder="Search"
             aria-label="Search"
             aria-describedby="search-addon"
+            v-model="searchQuery"
+            class="search-input"
           />
         </div>
-        <!-- <button class="add-btn" @click="goToLabelForm">
-          <i class="fa-solid fa-plus icon"></i> New Label
-        </button> -->
       </div>
-
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Product ID</th>
-              <th>Product Name</th>
-              <th>Quantity</th>
-              <th>Amount</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th class="action-column">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="label in paginatedLabels" :key="label.id">
-              <td>{{ label.label_id }}</td>
-              <td>{{ label.Master_Data?.product_name }}</td>
-              <td>{{ label.Order?.quantity }}</td>
-              <td>
-                {{
-                  label.Order?.total.toLocaleString("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  })
-                }}
-              </td>
-              <td>{{ label.created_at.split("T")[0] }}</td>
-              <td>
-                <span
-                  :class="{
-                    'done-status': label.Order?.status === 'DONE',
-                    'on-process-status': label.Order?.status === 'ON_PROCESS',
-                  }"
-                  >{{ label.Order?.status }}</span
-                >
-              </td>
-              <td>
-                <!--<button class="verif-btn" @click="openModal(label)">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>-->
-                <button class="verif-btn" @click="openModal(label)">
-                  <i class="fa-solid fa-print icon"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <nav aria-label="page-navigation-table">
-          <ul class="pagination">
-            <li class="page-item" :class="{ disabled: currentPage === 1 }">
-              <a
-                class="page-link"
-                href="#"
-                @click.prevent="changePage(currentPage - 1)"
-                aria-label="Previous"
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product ID</th>
+            <th @click="sortTable('User.username')">
+              Stakeholder
+              <span
+                v-if="sortKey === 'User.username'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('Master_Data.product_name')">
+              Product Name
+              <span
+                v-if="sortKey === 'Master_Data.product_name'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('Order.quantity')">
+              Quantity
+              <span
+                v-if="sortKey === 'Order.quantity'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('Order.total')">
+              Amount
+              <span
+                v-if="sortKey === 'Order.total'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('created_at')">
+              Date
+              <span
+                v-if="sortKey === 'created_at'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th @click="sortTable('Order.status')">
+              Status
+              <span
+                v-if="sortKey === 'Order.status'"
+                :class="{
+                  'fa-solid fa-sort-up sort-icon': sortDirection === 'asc',
+                  'fa-solid fa-sort-down sort-icon': sortDirection === 'desc',
+                  'fa-solid fa-sort sort-icon': sortDirection === '',
+                }"
+              ></span>
+              <span v-else class="fa-solid fa-sort sort-icon"></span>
+            </th>
+            <th class="action-column">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(label, index) in paginatedLabels" :key="label.label_id">
+            <td>{{ (currentPage - 1) * labelsPerPage + index + 1 }}</td>
+            <td>{{ label.Master_Data?.product_id }}</td>
+            <td>{{ label.User?.username }}</td>
+            <td>{{ label.Master_Data?.product_name }}</td>
+            <td>{{ label.Order?.quantity }}</td>
+            <td>
+              {{
+                label.Order?.total.toLocaleString("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+              }}
+            </td>
+            <td>{{ label.created_at.split("T")[0] }}</td>
+            <td>
+              <span
+                :class="{
+                  'done-status': label.Order?.status === 'DONE',
+                  'on-process-status': label.Order?.status === 'ON_PROCESS',
+                }"
+                >{{ label.Order?.status }}</span
               >
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            <li
+            </td>
+            <td>
+              <button class="verif-btn" @click="openModal(label)">
+                <i class="fa-solid fa-print icon"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <nav aria-label="page-navigation-table">
+        <ul class="pagination">
+          <div class="items-per-page">
+            <label for="itemsPerPage">Items per page: </label>
+            <select v-model="labelsPerPage" id="itemsPerPage">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+
+          <li class="page-label" :class="{ disabled: currentPage === 1 }">
+            <a
+              class="page-link"
+              href="#"
+              @click.prevent="changePage(currentPage - 1)"
+              aria-label="Previous"
+            >
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <!--<li
               v-for="page in totalPages"
               :key="page"
-              class="page-item"
+              class="page-label"
               :class="{ active: currentPage === page }"
             >
               <a class="page-link" href="#" @click.prevent="changePage(page)">
                 {{ page }}
               </a>
-            </li>
-            <li
-              class="page-item"
-              :class="{ disabled: currentPage === totalPages }"
+            </li>-->
+          <li
+            class="page-label"
+            :class="{ disabled: currentPage === totalPages }"
+          >
+            <a
+              class="page-link"
+              href="#"
+              @click.prevent="changePage(currentPage + 1)"
+              aria-label="Next"
             >
-              <a
-                class="page-link"
-                href="#"
-                @click.prevent="changePage(currentPage + 1)"
-                aria-label="Next"
-              >
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
 
-    <Modal :visible="isModalVisible" :title="'Edit Status'" @close="closeModal">
+    <Modal :visible="isModalVisible" @close="closeModal">
       <LabelForm :label="selectedLabel" :isCompact="true" />
-      <!-- <form @submit.prevent="updateStatus">
-        <h3>Update Status</h3>
-        <div class="status-dropdown">
-          <select v-model="form.status" required>
-            <option value="Pending">Pending</option>
-            <option value="On Process">On Process</option>
-            <option value="Done">Done</option>
-            <option value="Reject">Reject</option>
-          </select>
-        </div>
-        <div class="button-container">
-          <button type="submit" class="btn-success">Update</button>
-        </div>
-      </form> -->
+      <!--<div class="button-container">
+        <button type="submit" class="btn-success">Print</button>
+      </div>-->
     </Modal>
   </div>
 </template>
