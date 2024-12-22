@@ -184,7 +184,13 @@
                   min="1"
                 />
               </td>
-              <td>{{ product.quantity * product.price }}</td>
+              <td>{{ (product.quantity * product.price).toLocaleString("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })
+                  }}</td>
               <td>
                 <button
                   type="button"
