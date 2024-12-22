@@ -194,7 +194,7 @@
           <select v-model="form.status" required>
             <option selected>{{ form.status }}</option>
             <option value="PENDING">PENDING</option>
-            <!--<option value="ON_PROCESS">On Process</option>-->
+            <option value="ON_PROCESS">On Process</option>
             <option value="DONE">DONE</option>
             <option value="REJECT">REJECT</option>
           </select>
